@@ -1,6 +1,6 @@
 # SLOP Provider
 
-The provider exposes Sloppy-Tron as provider id `body`.
+The provider exposes SloppyTron as provider id `body`.
 
 Initial state surface:
 

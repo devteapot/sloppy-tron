@@ -1,6 +1,6 @@
-# Sloppy-Tron
+# SloppyTron
 
-Sloppy-Tron is the future-design specification for building a local embodied
+SloppyTron is the future-design specification for building a local embodied
 Sloppy presence using Reachy Mini as the baseline, without waiting for official
 hardware delivery.
 
@@ -18,7 +18,7 @@ Build a desktop/home robot body that gives Sloppy physical presence:
 - motion and media controls exposed as contextual SLOP affordances
 - safety and privacy controls visible before any risky action
 
-Sloppy-Tron should begin as a custom body with a stable Sloppy contract, not as
+SloppyTron should begin as a custom body with a stable Sloppy contract, not as
 a forced exact clone of Reachy Mini. Official Reachy compatibility remains useful
 as an optional track when the mechanical and motor choices match upstream
 assumptions.
@@ -75,7 +75,7 @@ There are two viable tracks:
   bus behavior. This gives maximum software reuse, but depends on expensive
   motors, exact mechanical tolerances, and a replacement for the official custom
   controller and power boards.
-- **Track B: Sloppy-Tron body.** Build a simpler Pi 5 robot that
+- **Track B: SloppyTron body.** Build a simpler Pi 5 robot that
   exposes equivalent high-level affordances to Sloppy, even if the motor layout
   differs. This gets moving immediately and avoids coupling v0 to the full
   Stewart platform.

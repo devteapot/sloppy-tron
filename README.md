@@ -1,6 +1,6 @@
-# Sloppy-Tron
+# SloppyTron
 
-Sloppy-Tron is the local robot body project for Sloppy: a small, home-local,
+SloppyTron is the local robot body project for Sloppy: a small, home-local,
 Reachy-inspired embodied presence that exposes its senses, motion, safety, and
 privacy state through SLOP.
 
@@ -30,7 +30,7 @@ ROS 2 body graph on Pi 5
 
 ## Repository Layout
 
-- `docs/spec.md` — current Sloppy-Tron specification.
+- `docs/spec.md` — current SloppyTron specification.
 - `ros/` — ROS 2 workspace notes and future packages.
 - `provider/` — SLOP adapter/provider notes and future TypeScript code.
 - `firmware/` — microcontroller or servo bridge firmware.
@@ -41,7 +41,7 @@ ROS 2 body graph on Pi 5
 
 ## Dependency Direction
 
-Sloppy-Tron is separate from Sloppy. The hardware stack should not depend on
+SloppyTron is separate from Sloppy. The hardware stack should not depend on
 Sloppy internals. The clean dependency boundary is:
 
 ```text

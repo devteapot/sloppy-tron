@@ -1,6 +1,6 @@
 # Patched dependencies
 
-These patches are mirrored from `devteapot/sloppy`. Sloppy-Tron currently
+These patches are mirrored from `devteapot/sloppy`. SloppyTron currently
 depends on Sloppy through `github:devteapot/sloppy`; Bun resolves Sloppy's
 patched dependencies from the consuming repository, so these files need to be
 present here until Sloppy no longer carries the patches.

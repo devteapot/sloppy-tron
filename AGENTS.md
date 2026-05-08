@@ -2,7 +2,7 @@
 
 ## Project
 
-Sloppy-Tron is a local robot body project for Sloppy.
+SloppyTron is a local robot body project for Sloppy.
 
 The design rule is:
 
