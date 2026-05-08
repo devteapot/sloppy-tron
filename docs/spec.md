@@ -1,10 +1,12 @@
 # SloppyTron
 
-SloppyTron is the future-design specification for building a local embodied
-Sloppy presence using Reachy Mini as the baseline, without waiting for official
+SloppyTron is the design specification for building a local embodied Sloppy
+presence using Reachy Mini as the baseline, without waiting for official
 hardware delivery.
 
-It is not implemented runtime behavior yet.
+It is partially scaffolded in this repo: the fake SLOP provider, shared
+ROS/SLOP bridge core, ROS 2 bridge package, and Docker-based ROS dev checks are
+in place. Real hardware-control runtime behavior is not implemented yet.
 
 ## Goal
 
@@ -431,6 +433,10 @@ The SLOP adapter should own agent-facing translation:
 - mark raw motor commands, calibration, firmware update, and emergency-stop
   reset as guarded or dangerous
 
+The Python adapter should use the PyPI `slop-ai` SDK as the protocol
+implementation and use this repo's fake backend plus the protocol reference in
+`~/dev/slop-slop-slop/spec` as the early contract source.
+
 Sloppy should not consume arbitrary ROS topics directly. Direct ROS exposure
 would recreate a flat tool/topic catalog and push low-level robotics decisions
 into the model. The SLOP adapter is the semantic and safety boundary.
@@ -441,6 +447,11 @@ Initial platform baseline:
 - Ubuntu 24.04
 - ROS 2 Jazzy LTS
 
+The Jetson Orin Super bridge should use the same semantic SLOP contract and
+shared bridge core, but target JetPack 6, Ubuntu 22.04, Python 3.10, and ROS 2
+Humble until Orin support for a production JetPack 7 / Ubuntu 24.04 stack is
+boring enough to switch to Jazzy.
+
 As of May 8, 2026, Jazzy is the conservative baseline for this project because
 it targets Ubuntu 24.04 and has long-term support. Reevaluate newer ROS 2 LTS
 releases after they are actually released and Pi, driver, `ros2_control`, and
@@ -448,10 +459,10 @@ media support are validated for this body.
 
 ### ROS 2 Phase Order
 
-Phase 0: fake ROS body graph.
+Phase 0: fake ROS body graph. In progress.
 
-- publish fake joint, pose, media, safety, and task state
-- implement fake gesture action server
+- publish fake pose, media, safety, and task state
+- route semantic commands through a fake body node
 - build the SLOP adapter against fake ROS state before hardware exists
 
 Phase 1: ROS 2 body graph plus SLOP adapter.
@@ -612,17 +623,20 @@ result.
 Sloppy should issue semantic actions, not raw joint twitches, during normal
 conversation:
 
-```ts
-type BodyGesture =
-  | "nod"
-  | "shake_no"
-  | "curious_tilt"
-  | "look_away"
-  | "look_back"
-  | "wake"
-  | "sleep"
-  | "idle_breathe"
-  | "small_ack";
+```python
+from typing import Literal
+
+BodyGesture = Literal[
+    "nod",
+    "shake_no",
+    "curious_tilt",
+    "look_away",
+    "look_back",
+    "wake",
+    "sleep",
+    "idle_breathe",
+    "small_ack",
+]
 ```
 
 The provider may translate these differently per backend:
@@ -724,8 +738,8 @@ Integration tests:
 - Official hardware design files are BY-SA-NC; derivative use must respect that.
 - The custom body must choose between official-compatible Dynamixels, cheaper
   servos, or a hybrid.
-- The exact ROS 2 package set, node graph, and actuator interface are not yet
-  selected.
+- The real hardware ROS 2 package set, node graph, and actuator interface are
+  not yet selected.
 - Local STT/TTS/vision stack is separate from body control and should not be
   hidden inside motion code.
 

@@ -21,8 +21,11 @@ The design rule is:
 
 ## Runtime And Package Manager
 
-- Use Bun for TypeScript scripts and package management.
-- Do not introduce `npm`, `pnpm`, or `yarn` lockfiles.
+- Python 3.12 is the on-body runtime. ROS nodes use `rclpy`. ROS packages use
+  `ament_python` and are built with `colcon`.
+- Use `uv` for non-ROS Python tooling and project-level scripts.
+- Do not introduce `npm`, `pnpm`, `yarn`, or `bun` lockfiles. Do not introduce
+  `pip-compile`, `conda`, or `pyenv` configs in-tree.
 - Target Raspberry Pi 5, Ubuntu 24.04, and ROS 2 Jazzy LTS for the first body.
 
 ## Architecture Rules
@@ -38,12 +41,14 @@ The design rule is:
 
 ## Code Style
 
-- TypeScript code uses ESM imports/exports.
-- Prefer named exports.
-- Use explicit types at module boundaries.
-- Use `unknown` for untrusted input.
+- Python code follows PEP 8. 4-space indentation.
+- Use `ruff` for both linting and formatting.
+- Use explicit type hints at module boundaries; `mypy --strict` for the SLOP
+  adapter package.
+- Use `object` (or `Any` only when justified) for untrusted input; validate at
+  the boundary.
+- Prefer named imports (`from x import y`) over star imports.
 - Keep comments rare and useful.
-- Use 2-space indentation and semicolons.
 
 ## Hardware Safety
 

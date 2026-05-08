@@ -1,0 +1,53 @@
+name: sloppy-tron
+
+x-ros-dev: &ros-dev
+  working_dir: /workspace
+  volumes:
+    - .:/workspace
+  environment:
+    ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-42}
+    UV_PROJECT_ENVIRONMENT: /tmp/sloppy-tron-venv
+    UV_LINK_MODE: copy
+
+services:
+  ros-jazzy:
+    <<: *ros-dev
+    image: sloppy-tron-ros-jazzy:dev
+    build:
+      context: .
+      dockerfile: docker/ros-dev.Dockerfile
+      args:
+        ROS_DISTRO: jazzy
+        ROS_IMAGE: ros:jazzy-ros-base-noble
+    volumes:
+      - .:/workspace
+      - uv-cache-jazzy:/root/.cache/uv
+      - ros-jazzy-build:/workspace/ros/build
+      - ros-jazzy-install:/workspace/ros/install
+      - ros-jazzy-log:/workspace/ros/log
+
+  ros-humble:
+    <<: *ros-dev
+    image: sloppy-tron-ros-humble:dev
+    build:
+      context: .
+      dockerfile: docker/ros-dev.Dockerfile
+      args:
+        ROS_DISTRO: humble
+        ROS_IMAGE: ros:humble-ros-base-jammy
+    volumes:
+      - .:/workspace
+      - uv-cache-humble:/root/.cache/uv
+      - ros-humble-build:/workspace/ros/build
+      - ros-humble-install:/workspace/ros/install
+      - ros-humble-log:/workspace/ros/log
+
+volumes:
+  uv-cache-jazzy:
+  uv-cache-humble:
+  ros-jazzy-build:
+  ros-jazzy-install:
+  ros-jazzy-log:
+  ros-humble-build:
+  ros-humble-install:
+  ros-humble-log:

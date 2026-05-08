@@ -32,3 +32,27 @@ Initial affordances:
 - `emergency_stop`
 
 The adapter should map ROS 2 state/actions into this semantic SLOP surface.
+
+## Current Python Scaffold
+
+The initial fake provider contract lives in `src/sloppy_tron/provider` and uses
+the PyPI `slop-ai` SDK for SLOP node descriptors, affordances, validation, and
+stdio/unix transports.
+
+Useful local commands:
+
+```sh
+uv run python -m sloppy_tron.provider serve-stdio
+uv run python -m sloppy_tron.provider serve-unix --register
+uv run python -m sloppy_tron.provider tree
+uv run python -m sloppy_tron.provider snapshot
+uv run python -m sloppy_tron.provider wake
+uv run python -m sloppy_tron.provider look-at-angles --pan 30 --tilt -10
+```
+
+The fake backend is intentionally hardware-free. It exposes the state tree,
+marks risky controls as guarded or dangerous, clamps look targets to configured
+limits, and records observable task state for accepted actions.
+
+`python -m sloppy_tron.provider` defaults to `serve-stdio`, so the example
+Sloppy provider config can launch it as a subprocess provider.

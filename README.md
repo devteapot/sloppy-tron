@@ -31,13 +31,20 @@ ROS 2 body graph on Pi 5
 ## Repository Layout
 
 - `docs/spec.md` — current SloppyTron specification.
-- `ros/` — ROS 2 workspace notes and future packages.
-- `provider/` — SLOP adapter/provider notes and future TypeScript code.
+- `ros/` — ROS 2 workspace notes and the current `ament_python` bridge
+  package.
+- `provider/` — SLOP adapter notes for the Python provider built on the SLOP
+  Python SDK.
+- `src/sloppy_tron/provider/` — current `slop-ai` SDK adapter, provider
+  contract, and fake backend.
+- `src/sloppy_tron/ros_bridge/` — ROS/SLOP bridge core shared by tests and ROS
+  nodes.
+- `tests/` — provider contract, SDK adapter, and fake backend tests.
 - `firmware/` — microcontroller or servo bridge firmware.
 - `cad/` — printable parts, mounts, and mechanical references.
 - `bom/` — parts list, wiring, power, and purchasing notes.
 - `config/` — example Sloppy/provider configuration.
-- `src/` — shared TypeScript package entrypoint and future helpers.
+- `docker/` — local macOS ROS dev containers for Humble and Jazzy.
 
 ## Dependency Direction
 
@@ -71,6 +78,27 @@ provider.
 Success means Sloppy can wake the body, look around, nod, idle, sleep, speak,
 request a camera frame explicitly, and always observe safety/privacy state.
 
+## Platform Bridges
+
+The SLOP contract and semantic bridge core are shared. The ROS edge has separate
+entrypoints for the first two likely platforms:
+
+- Raspberry Pi 5: `slop_bridge_pi5_jazzy` and `fake_body_pi5_jazzy`
+  for Ubuntu 24.04, Python 3.12, and ROS 2 Jazzy.
+- Jetson Orin Super: `slop_bridge_jetson_humble` and
+  `fake_body_jetson_humble` for JetPack 6, Ubuntu 22.04, Python 3.10, and
+  ROS 2 Humble.
+
+For local macOS development, use the Docker services in `compose.yaml`:
+
+```sh
+docker compose run --rm ros-jazzy ./docker/ros-check.sh
+docker compose run --rm ros-humble ./docker/ros-check.sh
+```
+
 ## Status
 
-Pre-build planning. No hardware-control code is implemented yet.
+Software scaffold in progress. The repo currently has a fake Python `body`
+provider using the `slop-ai` SDK, shared ROS bridge core logic, a first
+`ament_python` ROS package, and local Docker checks for Jazzy and Humble. No
+real hardware-control backend is implemented yet.

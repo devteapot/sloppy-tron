@@ -3,8 +3,9 @@
 providers:
   body:
     enabled: true
-    command: "bun"
+    command: "python"
     args:
-      - "run"
-      - "provider:start"
+      - "-m"
+      - "sloppy_tron.provider"
+      - "serve-stdio"
     cwd: "/Users/carlid/dev/sloppy-tron"
