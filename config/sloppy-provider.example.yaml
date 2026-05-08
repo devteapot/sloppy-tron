@@ -1,0 +1,10 @@
+# Example only. The final provider registration format should follow Sloppy's
+# active provider/plugin configuration model.
+providers:
+  body:
+    enabled: true
+    command: "bun"
+    args:
+      - "run"
+      - "provider:start"
+    cwd: "/Users/carlid/dev/sloppy-tron"
