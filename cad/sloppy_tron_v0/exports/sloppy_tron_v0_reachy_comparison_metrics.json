@@ -1,102 +1,40 @@
 {
-  "pass": "productized-v0.2",
-  "source_reference": "/tmp/reachy_mini/src/reachy_mini/descriptions/reachy_mini/urdf/robot_no_collision.urdf",
-  "source_sloppytron": "/Users/sloppy/dev/sloppy-tron/cad/sloppy_tron_v0/source/sloppy_tron_v0.blend",
-  "reference_visuals_seen": 161,
-  "reference_objects_imported": 161,
-  "reference_nonempty_meshes": 161,
-  "missing_meshes": [],
-  "unit_scale_applied_to_reference": 1.0,
-  "sloppytron_before_placement": {
-    "min_m": [
-      -0.090474,
-      -0.077828,
-      0.0
+  "primary": {
+    "sloppy_bbox_m": [
+      0.155,
+      0.1562,
+      0.3904
     ],
-    "max_m": [
-      0.090474,
-      0.07,
-      0.432103
-    ],
-    "dims_m": [
-      0.180948,
-      0.147828,
-      0.432103
-    ],
-    "center_m": [
-      0.0,
-      -0.003914,
-      0.216051
-    ]
+    "body_source": "Reachy Mini robot_no_collision.urdf STL body/mechanics; Reachy head/antenna visuals skipped",
+    "head_source": "/Users/sloppy/dev/slop/logo/sloppy.svg",
+    "svg_reference_loaded_in_scene": true,
+    "orientation": "front faces negative Y; same orientation used for Reachy reference comparison",
+    "reachy_body_visuals_imported_for_sloppy": 141,
+    "reachy_body_non_empty_meshes_for_sloppy": 141
   },
-  "reachy_reference_before_placement": {
-    "min_m": [
-      -0.077517,
-      -0.078084,
-      -0.000206
+  "comparison": {
+    "sloppy_bbox_m": [
+      0.155,
+      0.1562,
+      0.3904
     ],
-    "max_m": [
-      0.077485,
-      0.078084,
-      0.390914
+    "reachy_reference_bbox_m": [
+      0.155,
+      0.1562,
+      0.3911
     ],
-    "dims_m": [
-      0.155002,
-      0.156168,
-      0.39112
-    ],
-    "center_m": [
-      -1.6e-05,
-      0.0,
-      0.195354
+    "reachy_reference_visuals_imported": 161,
+    "reachy_reference_non_empty_meshes": 161,
+    "reachy_reference_missing_meshes": [],
+    "reachy_reference_orientation": "same as Sloppy body: URDF front/camera side faces negative Y",
+    "svg_reference_loaded_in_scene": true,
+    "sloppy_body_source": "Reachy Mini body/base/Stewart/speaker STL geometry imported from robot_no_collision.urdf",
+    "sloppy_head_source": "/Users/sloppy/dev/slop/logo/sloppy.svg",
+    "sloppy_head_strategy": "mascot SVG body/ears/eyes/nose curves scaled onto Reachy head envelope; Reachy head and antenna STL visuals skipped",
+    "internal_reserved_volumes": [
+      "Pi Camera Module 3: 25 x 24 x 12 mm",
+      "XVF3800-style 4-mic array: diameter 65 x 6 mm",
+      "5W speaker envelope: diameter 58 x 18 mm"
     ]
-  },
-  "sloppytron_final": {
-    "min_m": [
-      -0.246962,
-      -0.073914,
-      0.0
-    ],
-    "max_m": [
-      -0.066013,
-      0.073914,
-      0.432103
-    ],
-    "dims_m": [
-      0.180948,
-      0.147828,
-      0.432103
-    ],
-    "center_m": [
-      -0.156487,
-      0.0,
-      0.216051
-    ]
-  },
-  "reachy_reference_final": {
-    "min_m": [
-      0.078986,
-      -0.078084,
-      0.0
-    ],
-    "max_m": [
-      0.233989,
-      0.078084,
-      0.39112
-    ],
-    "dims_m": [
-      0.155002,
-      0.156168,
-      0.39112
-    ],
-    "center_m": [
-      0.156487,
-      -0.0,
-      0.19556
-    ]
-  },
-  "design_assessment": [
-    "v0.2 productizes the mascot shell: flatter faceplate, visible gimbal/neck mechanics, panel seams, screws, mic/speaker/camera details.",
-    "Reachy remains the envelope and kinematic reference only; exterior geometry is original SLOP mascot language."
-  ]
+  }
 }

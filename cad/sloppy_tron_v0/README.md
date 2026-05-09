@@ -26,18 +26,31 @@ cad/sloppy_tron_v0/exports/sloppy_tron_v0_reachy_comparison_preview.png
 cad/sloppy_tron_v0/exports/sloppy_tron_v0_reachy_comparison_metrics.json
 ```
 
-The current Blender pass is **v0.2 productized**: mascot-first, but no longer a primitive blockout.
-It keeps the blue Sloppy identity while borrowing Reachy's product logic: stable base, visible
-neck/gimbal mechanics, service seams, fastener details, and real sensor/speaker affordances.
+The current Blender pass is **v0.3 SVG-adapted / Reachy-body-derived**. It no longer tries to
+guess the body from primitives: the body/base/Stewart/speaker geometry is imported from the
+upstream Reachy Mini URDF/STL reference, while the head/face/ears are rebuilt from
+`~/dev/slop/logo/sloppy.svg`.
 
 Current visual language:
 
-- rounded blue torso/head pod with flatter manufactured faceplate
-- slim mascot ears mapped to `antenna_left/right`, with visible black mounts
-- green SLOP eyes inside black optical bezels
-- black nose/camera/mic/speaker features integrated into the face/body surfaces
-- dark-blue side fins as shell panels, not detached arms
-- graphite neck, bearing rings, support rods, pivot caps, screws, and gasket seams
+- Reachy Mini body/base/Stewart/speaker geometry reused directly as the mechanical envelope
+- Sloppy SVG body path scaled into the head front shell / faceplate
+- Sloppy SVG ears mapped into antenna-ear shell silhouettes with black mount pucks
+- raised mesh eyes/nose rebuilt from the SVG coordinates for reliable GLB/render readability
+- transparent reservation volumes for Pi Camera Module 3, a Ø65 mm 4-mic array, and a Ø58 mm 5W speaker
+- comparison scene with SloppyTron, Reachy Mini, and the source SVG board all front-aligned toward `-Y`
+
+The reproducible Blender generator is committed at:
+
+```text
+cad/sloppy_tron_v0/scripts/build_svg_adapted_reachy_scene.py
+```
+
+Run it from repo root with:
+
+```sh
+/Applications/Blender.app/Contents/MacOS/Blender -b --python cad/sloppy_tron_v0/scripts/build_svg_adapted_reachy_scene.py
+```
 
 ## CAD workflow
 
@@ -48,19 +61,21 @@ Current visual language:
    - ReSpeaker XVF3800 USB mic array
    - small USB speaker
    - XL330 pan/tilt bracket envelope
-4. Keep the exterior original. Reachy is the UX/mechatronic reference, not a geometry source.
+4. For this v0.3 review pass, reuse Reachy's body geometry as the mechanical starting point and
+   make the head/face original from the Sloppy SVG. Before final printable release, audit upstream
+   asset licensing and replace any non-redistributable vendor geometry with owned derivatives.
 5. Export printable parts into `exports/`; keep editable project/source files in `source/`.
 
 ## Reachy reference comparison
 
 `sloppy_tron_v0_reachy_comparison.*` loads the upstream `pollen-robotics/reachy_mini`
 `robot_no_collision.urdf` plus Git-LFS STL assets as a neutral gray reference next
-to the blue SloppyTron shell. It is for envelope, UX, and kinematic comparison only.
-Do not copy Reachy exterior geometry into SloppyTron.
+to the SloppyTron v0.3 assembly. The comparison scene now uses the same front axis for both
+robots (`-Y` toward the camera) and includes the source Sloppy SVG board on the side.
 
-Reference import metrics from the v0.2 comparison pass:
+Reference import metrics from the v0.3 comparison pass:
 
-- SloppyTron v0.2 bounding box: `0.181 × 0.148 × 0.432 m` including antenna ears
+- SloppyTron v0.3 bounding box: `0.155 × 0.156 × 0.390 m`
 - Reachy Mini reference bounding box: `0.155 × 0.156 × 0.391 m`
 - Imported Reachy visuals: `161`, non-empty meshes: `161`, missing meshes: `0`
 
@@ -73,10 +88,10 @@ git lfs install --skip-repo
 git -C /tmp/reachy_mini lfs pull
 ```
 
-Next visual pass should refine the now-productized shell rather than restart from primitives:
-soften the debug-looking gasket curves where they feel too graphic, tune the base/body collar,
-make the antenna-ear silhouette readable from more angles, and begin reserving real internal
-volumes for camera/audio/speaker hardware.
+Next visual pass should refine the now-reference-derived assembly rather than restart from primitives:
+increase color/material contrast in the review renders, soften the head/body adapter where it still
+looks like a temporary collar, thicken the flat SVG ear shells into printable antenna housings, and
+turn the transparent internal reservations into actual bracket/cable-path geometry.
 
 ## Hard constraint
 
