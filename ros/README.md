@@ -85,6 +85,12 @@ provider over its Unix SLOP socket, and verifies the resulting pose through SLOP
 state. Use `./docker/ros-smoke.sh baseline` for the deterministic body graph and
 `./docker/ros-smoke.sh fake` for the lightweight fake backend.
 
+The ROS package also includes a `launch_testing` integration test at
+`ros/src/sloppy_tron_ros_bridge/test/test_slop_bridge_integration.py`. It
+launches the fake body and SLOP bridge under `colcon test`, invokes
+`enable_motion` and `look_at_angles` through the Unix SLOP socket, and verifies
+the platform metadata and final fake pose through SLOP state.
+
 Example Pi 5 / Jazzy workflow:
 
 ```sh
@@ -95,6 +101,8 @@ python3 -m pip install -e .
 cd ros
 colcon build --symlink-install
 source install/setup.bash
+colcon test --packages-select sloppy_tron_ros_bridge
+colcon test-result --verbose
 ros2 launch sloppy_tron_body_baseline pi5_jazzy.launch.py
 # or the fake bridge-only body:
 # ros2 launch sloppy_tron_ros_bridge pi5_jazzy.launch.py
@@ -109,6 +117,8 @@ python3 -m pip install -e .
 cd ros
 colcon build --symlink-install
 source install/setup.bash
+colcon test --packages-select sloppy_tron_ros_bridge
+colcon test-result --verbose
 ros2 launch sloppy_tron_body_baseline jetson_humble.launch.py
 # or the fake bridge-only body:
 # ros2 launch sloppy_tron_ros_bridge jetson_humble.launch.py

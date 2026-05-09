@@ -23,6 +23,7 @@ setup(
     maintainer_email="sloppy@example.invalid",
     description="ROS 2 bridge nodes for the SloppyTron SLOP body provider.",
     license="MIT",
+    tests_require=["pytest"],
     entry_points={
         "console_scripts": [
             "slop_bridge = sloppy_tron_ros_bridge.slop_bridge_node:main",

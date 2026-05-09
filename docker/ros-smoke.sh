@@ -66,7 +66,14 @@ case "${platform_id}:${body_mode}" in
     ;;
 esac
 
-socket_path="/tmp/slop/sloppy-tron-${platform_id}-smoke-$$.sock"
+case "${platform_id}" in
+  pi5_jazzy) smoke_ros_domain_id="${SLOPPY_TRON_SMOKE_ROS_DOMAIN_ID:-142}" ;;
+  jetson_humble) smoke_ros_domain_id="${SLOPPY_TRON_SMOKE_ROS_DOMAIN_ID:-143}" ;;
+esac
+
+export ROS_DOMAIN_ID="${smoke_ros_domain_id}"
+mkdir -p /tmp/slop
+socket_path="$(mktemp -u "/tmp/slop/sloppy-tron-${platform_id}-smoke-XXXXXX.sock")"
 log_dir="$(mktemp -d)"
 body_log="${log_dir}/${body_mode}_body.log"
 bridge_log="${log_dir}/slop_bridge.log"

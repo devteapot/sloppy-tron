@@ -18,3 +18,5 @@ source install/setup.bash
 set -u
 ros2 pkg executables sloppy_tron_ros_bridge
 ros2 pkg executables sloppy_tron_body_baseline
+colcon test --packages-select sloppy_tron_ros_bridge --event-handlers console_direct+
+colcon test-result --verbose

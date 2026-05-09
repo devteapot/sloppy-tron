@@ -37,3 +37,6 @@ files = ["src/sloppy_tron/provider", "src/sloppy_tron/ros_bridge", "src/sloppy_t
 [[tool.mypy.overrides]]
 module = ["slop_ai", "slop_ai.*"]
 ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

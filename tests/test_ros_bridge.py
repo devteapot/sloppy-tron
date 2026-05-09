@@ -106,6 +106,7 @@ def test_ros_bridge_backend_preserves_bridge_metadata_after_body_state_update() 
     assert state["connection"]["platform"] == "pi5_jazzy"
     assert state["runtime"]["config"]["providerBackend"] == "ros_bridge"
     assert state["runtime"]["config"]["bodyBackend"] == "fake"
+    assert state["runtime"]["config"]["platform"] == "pi5_jazzy"
 
 
 def test_ros_bridge_backend_preserves_task_id_through_body_snapshot() -> None:

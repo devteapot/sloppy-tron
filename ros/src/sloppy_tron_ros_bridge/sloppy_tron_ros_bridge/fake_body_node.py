@@ -102,9 +102,12 @@ def main_for_platform(platform_id: str) -> None:
     node = FakeBodyNode(get_platform(platform_id))
     try:
         rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
     finally:
         node.destroy_node()
-        rclpy.shutdown()
+        if rclpy.ok():
+            rclpy.shutdown()
 
 
 def main() -> None:

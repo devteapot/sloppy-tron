@@ -84,6 +84,8 @@ topic endpoints to match, connects through the bridge's Unix SLOP socket,
 invokes `enable_motion`, invokes `look_at_angles`, and verifies the final pose
 through SLOP state. Baseline mode also publishes `sensor_msgs/JointState` for
 `body_yaw_joint`, `head_pan_joint`, `head_tilt_joint`, and both antenna joints.
+It uses an isolated ROS domain per platform by default; set
+`SLOPPY_TRON_SMOKE_ROS_DOMAIN_ID` to override that.
 
 Open an interactive shell:
 
@@ -95,7 +97,8 @@ docker compose run --rm ros-humble
 
 The check script runs Python lint/type/tests, installs the shared
 `sloppy_tron` package into the container's ROS Python environment, builds the
-ROS workspace with `colcon`, and lists the bridge executables.
+ROS workspace with `colcon`, lists the bridge executables, and runs the ROS
+package integration tests with `colcon test`.
 
 The compose setup keeps ROS `build/`, `install/`, and `log/` directories in
 named Docker volumes per distro so Humble and Jazzy do not trample each other.
