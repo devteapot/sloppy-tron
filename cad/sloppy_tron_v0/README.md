@@ -7,20 +7,27 @@ Visual direction: Reachy-inspired desktop companion, using the Sloppy mascot fro
 
 ## Current status
 
-The committed geometry is a ROS visual/kinematic scaffold, not final printable CAD:
+The committed geometry has two layers:
 
 ```text
+# ROS visual/kinematic scaffold, not final printable CAD.
 ros/src/sloppy_tron_description/urdf/sloppy_tron_v0.urdf.xacro
 ros/src/sloppy_tron_description/meshes/visual/*.stl
+
+# Blender visual iteration source and review exports.
+cad/sloppy_tron_v0/source/sloppy_tron_v0.blend
+cad/sloppy_tron_v0/exports/sloppy_tron_v0.glb
+cad/sloppy_tron_v0/exports/sloppy_tron_v0_preview.png
 ```
 
-The generated STL meshes establish proportions and visual language:
+The first Blender pass establishes proportions and visual language:
 
 - rounded blue torso/head pod
 - cat-like blue ears mapped to `antenna_left/right`
 - green eyes with black rings/pupils
 - black nose/camera/mic/speaker features
 - dark-blue side fins inspired by the mascot arms
+- graphite neck/joint markers for ROS contract readability
 
 ## CAD workflow
 
