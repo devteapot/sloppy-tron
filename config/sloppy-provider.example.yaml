@@ -1,11 +1,35 @@
-# Example only. The final provider registration format should follow Sloppy's
-# active provider/plugin configuration model.
+# Example only: Sloppy discovers external SLOP providers from descriptor files.
+# SloppyTron's Python provider can write its descriptor automatically when
+# serving over a Unix socket with `--register`.
+
+# Terminal 1: start the body provider. Use `--backend reachy` when a Reachy Mini
+# daemon is already running; omit backend args for the hardware-free fake body.
+#
+# uv run python -m sloppy_tron.provider \
+#   --backend reachy \
+#   --reachy-host localhost \
+#   --reachy-port 8001 \
+#   serve-unix \
+#   --socket-path /tmp/slop/sloppy-tron-body.sock \
+#   --register
+
+# Sloppy config fragment:
 providers:
-  body:
+  discovery:
     enabled: true
-    command: "python"
-    args:
-      - "-m"
-      - "sloppy_tron.provider"
-      - "serve-stdio"
-    cwd: "/Users/carlid/dev/sloppy-tron"
+    paths:
+      - ~/.slop/providers
+      - /tmp/slop/providers
+
+# The descriptor written by `--register` looks like this:
+#
+# {
+#   "id": "body",
+#   "name": "SloppyTron Body",
+#   "slop_version": "0.1",
+#   "transport": {
+#     "type": "unix",
+#     "path": "/tmp/slop/sloppy-tron-body.sock"
+#   },
+#   "capabilities": ["state", "patches", "affordances"]
+# }

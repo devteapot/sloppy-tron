@@ -113,11 +113,21 @@ Reachy install:
 docker compose build reachy-e2e
 docker compose run --rm reachy-e2e ./docker/reachy-e2e-check.sh mockup
 docker compose run --rm reachy-e2e ./docker/reachy-e2e-check.sh mujoco
+
+# Full Sloppy ConsumerHub discovery/query/invoke path. Defaults to mounting
+# ../sloppy; set SLOPPY_REPO=/absolute/path/to/sloppy if needed.
+docker compose run --rm reachy-e2e ./docker/sloppy-consumer-reachy-smoke.sh mockup
+docker compose run --rm reachy-e2e ./docker/sloppy-consumer-reachy-smoke.sh mujoco
 ```
 
-The smoke client verifies daemon status, enables motion, sends a semantic
+The backend smoke client verifies daemon status, enables motion, sends a semantic
 `look_at_angles` command through `ReachyDaemonBackend`, and checks that the final
-state still has the standard SLOP body-provider shape.
+state still has the standard SLOP body-provider shape. The Sloppy consumer smoke
+starts the provider with `serve-unix --register`, lets Sloppy discover the `body`
+descriptor, queries `/body`/`/pose`, invokes `look_at_angles`, and verifies
+`/tasks` and final pose shape through Sloppy's `ConsumerHub`.
 
-`python -m sloppy_tron.provider` defaults to `serve-stdio`, so the example
-Sloppy provider config can launch it as a subprocess provider.
+For active Sloppy integration, prefer `serve-unix --register`; current Sloppy
+external-provider discovery consumes Unix/WebSocket descriptors from
+`providers.discovery.paths` rather than a legacy `providers.body` subprocess
+config.

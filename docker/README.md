@@ -13,9 +13,10 @@ Two ROS services are defined:
 One Reachy end-to-end service is also defined:
 
 - `reachy-e2e` uses `python:3.12-bookworm`, installs the pinned upstream
-  `reachy_mini[mujoco]` daemon, MuJoCo 3.3.0, GStreamer introspection libs, and
-  software headless GL (`MUJOCO_GL=osmesa`). It is for validating the
-  SloppyTron `ReachyDaemonBackend` against the real upstream FastAPI daemon.
+  `reachy_mini[mujoco]` daemon, MuJoCo 3.3.0, Bun, GStreamer introspection libs,
+  and software headless GL (`MUJOCO_GL=osmesa`). It is for validating the
+  SloppyTron `ReachyDaemonBackend` and the real Sloppy ConsumerHub discovery path
+  against the upstream FastAPI daemon.
 
 Build the images:
 
@@ -34,6 +35,20 @@ docker compose run --rm reachy-e2e ./docker/reachy-e2e-check.sh mockup
 # Full upstream daemon + MuJoCo + SloppyTron Reachy backend path.
 docker compose run --rm reachy-e2e ./docker/reachy-e2e-check.sh mujoco
 ```
+
+Run the Sloppy consumer smoke in the same container:
+
+```sh
+# Requires the Sloppy repo mounted into the container. By default compose uses
+# ../sloppy; override with SLOPPY_REPO=/absolute/path/to/sloppy if needed.
+docker compose run --rm reachy-e2e ./docker/sloppy-consumer-reachy-smoke.sh mockup
+docker compose run --rm reachy-e2e ./docker/sloppy-consumer-reachy-smoke.sh mujoco
+```
+
+The Sloppy consumer smoke starts `reachy-mini-daemon`, starts the SloppyTron
+provider over a Unix socket with `--register`, lets Sloppy discover the `body`
+provider descriptor, queries `/body` and `/pose` through `ConsumerHub`, invokes
+`look_at_angles`, and verifies `/tasks`/final pose shape.
 
 The Reachy smoke script starts `reachy-mini-daemon`, waits for
 `/api/daemon/status`, connects through `ReachyDaemonBackend`, invokes
@@ -81,8 +96,12 @@ It also sets `UV_PROJECT_ENVIRONMENT=/tmp/sloppy-tron-venv` so Linux containers
 do not reuse or overwrite a macOS `.venv`.
 
 The Reachy image pins the upstream daemon through the `REACHY_MINI_SPEC` build
-argument, defaulting to `reachy_mini[mujoco]==1.7.1`:
+argument, defaulting to `reachy_mini[mujoco]==1.7.1`. It also expects a local
+Sloppy checkout for consumer smoke tests; compose mounts `${SLOPPY_REPO:-../sloppy}`
+at `/opt/sloppy` and keeps Linux `node_modules` in a named Docker volume so the
+host checkout is not polluted.
 
 ```sh
 REACHY_MINI_SPEC='reachy_mini[mujoco]==1.7.1' docker compose build reachy-e2e
+SLOPPY_REPO=/Users/sloppy/dev/sloppy docker compose run --rm reachy-e2e ./docker/sloppy-consumer-reachy-smoke.sh mujoco
 ```

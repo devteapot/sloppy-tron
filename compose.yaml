@@ -20,11 +20,15 @@ services:
         REACHY_MINI_SPEC: ${REACHY_MINI_SPEC:-reachy_mini[mujoco]==1.7.1}
     volumes:
       - .:/workspace
+      - ${SLOPPY_REPO:-../sloppy}:/opt/sloppy
       - uv-cache-reachy:/root/.cache/uv
+      - bun-cache-reachy:/root/.bun/install/cache
+      - sloppy-node-modules-reachy:/opt/sloppy/node_modules
     environment:
       MUJOCO_GL: ${MUJOCO_GL:-osmesa}
       PYOPENGL_PLATFORM: ${PYOPENGL_PLATFORM:-osmesa}
       REACHY_PORT: ${REACHY_PORT:-8001}
+      SLOPPY_REPO: /opt/sloppy
       UV_PROJECT_ENVIRONMENT: /tmp/sloppy-tron-venv
       UV_LINK_MODE: copy
     ports:
@@ -64,6 +68,8 @@ services:
 
 volumes:
   uv-cache-reachy:
+  bun-cache-reachy:
+  sloppy-node-modules-reachy:
   uv-cache-jazzy:
   uv-cache-humble:
   ros-jazzy-build:

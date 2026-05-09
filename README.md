@@ -44,7 +44,7 @@ ROS 2 body graph on Pi 5
 - `cad/` — printable parts, mounts, and mechanical references.
 - `bom/` — parts list, wiring, power, and purchasing notes.
 - `config/` — example Sloppy/provider configuration.
-- `docker/` — local macOS ROS dev containers for Humble and Jazzy.
+- `docker/` — local macOS Reachy e2e and ROS dev containers.
 
 ## Dependency Direction
 
@@ -97,6 +97,11 @@ docker compose build reachy-e2e
 docker compose run --rm reachy-e2e ./docker/reachy-e2e-check.sh mockup
 docker compose run --rm reachy-e2e ./docker/reachy-e2e-check.sh mujoco
 
+# Sloppy ConsumerHub external-provider checks. Defaults to mounting ../sloppy;
+# set SLOPPY_REPO=/absolute/path/to/sloppy if your checkout lives elsewhere.
+docker compose run --rm reachy-e2e ./docker/sloppy-consumer-reachy-smoke.sh mockup
+docker compose run --rm reachy-e2e ./docker/sloppy-consumer-reachy-smoke.sh mujoco
+
 # ROS bridge checks.
 docker compose run --rm ros-jazzy ./docker/ros-check.sh
 docker compose run --rm ros-humble ./docker/ros-check.sh
@@ -109,6 +114,7 @@ docker compose run --rm ros-humble ./docker/ros-smoke.sh
 Software scaffold in progress. The repo currently has a fake Python `body`
 provider using the `slop-ai` SDK, a Reachy Mini daemon backend for mockup/MuJoCo
 simulation behind the same SLOP consumer contract, a dedicated Reachy e2e Docker
-container for upstream daemon validation, shared ROS bridge core logic, a first
-`ament_python` ROS package, and local Docker checks for Jazzy and Humble. No real
-hardware-control backend is implemented yet.
+container for upstream daemon validation and Sloppy ConsumerHub discovery smoke,
+shared ROS bridge core logic, a first `ament_python` ROS package, and local
+Docker checks for Jazzy and Humble. No real hardware-control backend is
+implemented yet.
