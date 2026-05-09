@@ -94,6 +94,8 @@ For local macOS development, use the Docker services in `compose.yaml`:
 ```sh
 docker compose run --rm ros-jazzy ./docker/ros-check.sh
 docker compose run --rm ros-humble ./docker/ros-check.sh
+docker compose run --rm ros-jazzy ./docker/ros-smoke.sh
+docker compose run --rm ros-humble ./docker/ros-smoke.sh
 ```
 
 ## Status

@@ -26,6 +26,8 @@ On macOS, use the Docker services from the repo root:
 ```sh
 docker compose run --rm ros-jazzy ./docker/ros-check.sh
 docker compose run --rm ros-humble ./docker/ros-check.sh
+docker compose run --rm ros-jazzy ./docker/ros-smoke.sh
+docker compose run --rm ros-humble ./docker/ros-smoke.sh
 ```
 
 These run the same shared code through ROS 2 Jazzy and ROS 2 Humble containers.
@@ -58,6 +60,10 @@ hardware interface. The command envelope stays semantic (`wake`, `sleep`,
 `look_at_angles`, `gesture`, `capture_frame`, `enable_motion`,
 `emergency_stop`) so raw motor control remains outside the Sloppy-facing
 provider.
+
+The Docker smoke test starts `fake_body_*` and `slop_bridge_*`, waits for the
+ROS topic endpoints to connect, invokes the provider over its Unix SLOP socket,
+and verifies the resulting fake pose through SLOP state.
 
 Example Pi 5 / Jazzy workflow:
 

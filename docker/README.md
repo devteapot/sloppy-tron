@@ -24,6 +24,19 @@ docker compose run --rm ros-jazzy ./docker/ros-check.sh
 docker compose run --rm ros-humble ./docker/ros-check.sh
 ```
 
+Run the runtime smoke test for either distro:
+
+```sh
+docker compose run --rm ros-jazzy ./docker/ros-smoke.sh
+docker compose run --rm ros-humble ./docker/ros-smoke.sh
+```
+
+The smoke script installs the shared package into the ROS Python environment,
+builds the ROS workspace, starts the fake body and SLOP bridge nodes, waits for
+the `body_state` and `body_command` topic endpoints to match, connects through
+the bridge's Unix SLOP socket, invokes `enable_motion`, invokes
+`look_at_angles`, and verifies the final pose through SLOP state.
+
 Open an interactive shell:
 
 ```sh
