@@ -6,9 +6,10 @@ Target baseline:
 - Ubuntu 24.04
 - ROS 2 Jazzy LTS
 
-Planned node graph:
+Planned/current node graph:
 
 - fake body state publisher
+- deterministic Reachy-compatible baseline body publisher
 - servo bridge node
 - camera state node
 - audio state node
@@ -26,8 +27,14 @@ On macOS, use the Docker services from the repo root:
 ```sh
 docker compose run --rm ros-jazzy ./docker/ros-check.sh
 docker compose run --rm ros-humble ./docker/ros-check.sh
-docker compose run --rm ros-jazzy ./docker/ros-smoke.sh
-docker compose run --rm ros-humble ./docker/ros-smoke.sh
+
+# Fast fake-backend bridge smoke.
+docker compose run --rm ros-jazzy ./docker/ros-smoke.sh fake
+docker compose run --rm ros-humble ./docker/ros-smoke.sh fake
+
+# Deterministic ROS body baseline smoke.
+docker compose run --rm ros-jazzy ./docker/ros-smoke.sh baseline
+docker compose run --rm ros-humble ./docker/ros-smoke.sh baseline
 ```
 
 These run the same shared code through ROS 2 Jazzy and ROS 2 Humble containers.
@@ -35,12 +42,23 @@ See `docker/README.md` for image details and interactive shell commands.
 
 ## Current Bridge Scaffold
 
-The first ROS package lives at `ros/src/sloppy_tron_ros_bridge`.
+The ROS workspace now has two package roles:
 
-It adds two initial node roles:
+- `ros/src/sloppy_tron_ros_bridge` hosts the SLOP bridge plus the lightweight
+  fake body node.
+- `ros/src/sloppy_tron_body_baseline` hosts a deterministic, Reachy-compatible
+  kinematic baseline body. It publishes the same semantic `body_state` JSON as
+  other body backends plus `sensor_msgs/JointState` on `joint_states`. It is the
+  open baseline for SloppyTron's own ROS body graph; Reachy MuJoCo remains the
+  vendor oracle, not the substrate we depend on.
+
+It adds these initial node roles:
 
 - `fake_body_*` owns the fake backend, publishes semantic body state on
   `body_state`, and executes semantic commands from `body_command`.
+- `baseline_body_*` owns the deterministic ROS baseline, publishes semantic body
+  state on `body_state`, executes semantic commands from `body_command`, and
+  publishes kinematic joints on `joint_states`.
 - `slop_bridge_*` subscribes to `body_state`, exposes the `body` SLOP provider
   on a local Unix socket, and publishes SLOP affordance invocations as semantic
   commands on `body_command`.
@@ -49,11 +67,11 @@ Platform-specific entrypoints:
 
 | Platform | ROS | Entrypoints | Launch |
 | --- | --- | --- | --- |
-| Raspberry Pi 5 / Ubuntu 24.04 | Jazzy | `fake_body_pi5_jazzy`, `slop_bridge_pi5_jazzy` | `pi5_jazzy.launch.py` |
-| Jetson Orin Super / JetPack 6 / Ubuntu 22.04 | Humble | `fake_body_jetson_humble`, `slop_bridge_jetson_humble` | `jetson_humble.launch.py` |
+| Raspberry Pi 5 / Ubuntu 24.04 | Jazzy | `fake_body_pi5_jazzy`, `baseline_body_pi5_jazzy`, `slop_bridge_pi5_jazzy` | `sloppy_tron_ros_bridge/pi5_jazzy.launch.py`, `sloppy_tron_body_baseline/pi5_jazzy.launch.py` |
+| Jetson Orin Super / JetPack 6 / Ubuntu 22.04 | Humble | `fake_body_jetson_humble`, `baseline_body_jetson_humble`, `slop_bridge_jetson_humble` | `sloppy_tron_ros_bridge/jetson_humble.launch.py`, `sloppy_tron_body_baseline/jetson_humble.launch.py` |
 
-The generic `fake_body` and `slop_bridge` commands currently default to the
-Pi 5 / Jazzy profile.
+The generic `fake_body`, `baseline_body`, and `slop_bridge` commands currently
+default to the Pi 5 / Jazzy profile.
 
 The command/state topics are a development bridge, not the final low-level
 hardware interface. The command envelope stays semantic (`wake`, `sleep`,
@@ -61,9 +79,11 @@ hardware interface. The command envelope stays semantic (`wake`, `sleep`,
 `emergency_stop`) so raw motor control remains outside the Sloppy-facing
 provider.
 
-The Docker smoke test starts `fake_body_*` and `slop_bridge_*`, waits for the
-ROS topic endpoints to connect, invokes the provider over its Unix SLOP socket,
-and verifies the resulting fake pose through SLOP state.
+The Docker smoke test starts `fake_body_*` or `baseline_body_*` plus
+`slop_bridge_*`, waits for the ROS topic endpoints to connect, invokes the
+provider over its Unix SLOP socket, and verifies the resulting pose through SLOP
+state. Use `./docker/ros-smoke.sh baseline` for the deterministic body graph and
+`./docker/ros-smoke.sh fake` for the lightweight fake backend.
 
 Example Pi 5 / Jazzy workflow:
 
@@ -75,7 +95,9 @@ python3 -m pip install -e .
 cd ros
 colcon build --symlink-install
 source install/setup.bash
-ros2 launch sloppy_tron_ros_bridge pi5_jazzy.launch.py
+ros2 launch sloppy_tron_body_baseline pi5_jazzy.launch.py
+# or the fake bridge-only body:
+# ros2 launch sloppy_tron_ros_bridge pi5_jazzy.launch.py
 ```
 
 Example Jetson / Humble workflow:
@@ -87,7 +109,9 @@ python3 -m pip install -e .
 cd ros
 colcon build --symlink-install
 source install/setup.bash
-ros2 launch sloppy_tron_ros_bridge jetson_humble.launch.py
+ros2 launch sloppy_tron_body_baseline jetson_humble.launch.py
+# or the fake bridge-only body:
+# ros2 launch sloppy_tron_ros_bridge jetson_humble.launch.py
 ```
 
 The editable install makes the shared `sloppy_tron` provider package visible to

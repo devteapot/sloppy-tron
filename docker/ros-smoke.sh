@@ -3,39 +3,74 @@ set -euo pipefail
 
 cd /workspace
 
-platform_id="${1:-}"
-if [[ -z "${platform_id}" ]]; then
+platform_id=""
+body_mode="fake"
+
+infer_platform_id() {
   case "${ROS_DISTRO:-}" in
-    jazzy) platform_id="pi5_jazzy" ;;
-    humble) platform_id="jetson_humble" ;;
+    jazzy) echo "pi5_jazzy" ;;
+    humble) echo "jetson_humble" ;;
     *)
       echo "Unable to infer platform from ROS_DISTRO=${ROS_DISTRO:-unset}" >&2
-      echo "Usage: $0 pi5_jazzy|jetson_humble" >&2
+      echo "Usage: $0 [pi5_jazzy|jetson_humble] [fake|baseline]" >&2
+      echo "       $0 [fake|baseline]" >&2
       exit 2
       ;;
   esac
-fi
+}
 
-case "${platform_id}" in
-  pi5_jazzy)
-    fake_exec="fake_body_pi5_jazzy"
+case "${1:-}" in
+  "")
+    platform_id="$(infer_platform_id)"
+    ;;
+  fake|baseline)
+    platform_id="$(infer_platform_id)"
+    body_mode="$1"
+    ;;
+  pi5_jazzy|jetson_humble)
+    platform_id="$1"
+    body_mode="${2:-fake}"
+    ;;
+  *)
+    echo "Unsupported platform/body mode ${1}" >&2
+    echo "Usage: $0 [pi5_jazzy|jetson_humble] [fake|baseline]" >&2
+    echo "       $0 [fake|baseline]" >&2
+    exit 2
+    ;;
+esac
+
+case "${platform_id}:${body_mode}" in
+  pi5_jazzy:fake)
+    body_package="sloppy_tron_ros_bridge"
+    body_exec="fake_body_pi5_jazzy"
     bridge_exec="slop_bridge_pi5_jazzy"
     ;;
-  jetson_humble)
-    fake_exec="fake_body_jetson_humble"
+  jetson_humble:fake)
+    body_package="sloppy_tron_ros_bridge"
+    body_exec="fake_body_jetson_humble"
+    bridge_exec="slop_bridge_jetson_humble"
+    ;;
+  pi5_jazzy:baseline)
+    body_package="sloppy_tron_body_baseline"
+    body_exec="baseline_body_pi5_jazzy"
+    bridge_exec="slop_bridge_pi5_jazzy"
+    ;;
+  jetson_humble:baseline)
+    body_package="sloppy_tron_body_baseline"
+    body_exec="baseline_body_jetson_humble"
     bridge_exec="slop_bridge_jetson_humble"
     ;;
   *)
-    echo "Unsupported platform ${platform_id}" >&2
+    echo "Unsupported platform/body mode ${platform_id}:${body_mode}" >&2
     exit 2
     ;;
 esac
 
 socket_path="/tmp/slop/sloppy-tron-${platform_id}-smoke-$$.sock"
 log_dir="$(mktemp -d)"
-fake_log="${log_dir}/fake_body.log"
+body_log="${log_dir}/${body_mode}_body.log"
 bridge_log="${log_dir}/slop_bridge.log"
-fake_pid=""
+body_pid=""
 bridge_pid=""
 
 cleanup() {
@@ -43,15 +78,15 @@ cleanup() {
   if [[ -n "${bridge_pid}" ]] && kill -0 "${bridge_pid}" 2>/dev/null; then
     kill "${bridge_pid}" 2>/dev/null || true
   fi
-  if [[ -n "${fake_pid}" ]] && kill -0 "${fake_pid}" 2>/dev/null; then
-    kill "${fake_pid}" 2>/dev/null || true
+  if [[ -n "${body_pid}" ]] && kill -0 "${body_pid}" 2>/dev/null; then
+    kill "${body_pid}" 2>/dev/null || true
   fi
   wait "${bridge_pid:-0}" 2>/dev/null || true
-  wait "${fake_pid:-0}" 2>/dev/null || true
+  wait "${body_pid:-0}" 2>/dev/null || true
   rm -f "${socket_path}"
   if [[ "${status}" -ne 0 ]]; then
-    echo "--- fake body log ---" >&2
-    sed -n '1,200p' "${fake_log}" >&2 || true
+    echo "--- ${body_mode} body log ---" >&2
+    sed -n '1,200p' "${body_log}" >&2 || true
     echo "--- SLOP bridge log ---" >&2
     sed -n '1,200p' "${bridge_log}" >&2 || true
   fi
@@ -71,8 +106,8 @@ cd /workspace
 
 rm -f "${socket_path}"
 
-ros2 run sloppy_tron_ros_bridge "${fake_exec}" >"${fake_log}" 2>&1 &
-fake_pid=$!
+ros2 run "${body_package}" "${body_exec}" >"${body_log}" 2>&1 &
+body_pid=$!
 ros2 run sloppy_tron_ros_bridge "${bridge_exec}" \
   --ros-args \
   -p "socket_path:=${socket_path}" \
@@ -81,8 +116,8 @@ ros2 run sloppy_tron_ros_bridge "${bridge_exec}" \
 bridge_pid=$!
 
 wait_for_processes() {
-  if ! kill -0 "${fake_pid}" 2>/dev/null; then
-    echo "fake body process exited early" >&2
+  if ! kill -0 "${body_pid}" 2>/dev/null; then
+    echo "${body_mode} body process exited early" >&2
     return 1
   fi
   if ! kill -0 "${bridge_pid}" 2>/dev/null; then
@@ -125,4 +160,4 @@ wait_for_topic /body_command
 
 python3 /workspace/docker/ros-smoke-client.py "${socket_path}" "${platform_id}"
 
-echo "ROS/SLOP smoke test passed for ${platform_id}"
+echo "ROS/SLOP smoke test passed for ${platform_id} (${body_mode})"

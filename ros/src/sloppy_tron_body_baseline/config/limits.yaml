@@ -1,0 +1,16 @@
+limits:
+  body_yaw:
+    min: -180.0
+    max: 180.0
+  head_pan:
+    min: -60.0
+    max: 60.0
+  head_tilt:
+    min: -35.0
+    max: 35.0
+  antenna_left:
+    min: -90.0
+    max: 90.0
+  antenna_right:
+    min: -90.0
+    max: 90.0

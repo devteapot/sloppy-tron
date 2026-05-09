@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<robot name="sloppy_tron_baseline" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <link name="base_link" />
+
+  <joint name="body_yaw_joint" type="continuous">
+    <parent link="base_link" />
+    <child link="neck_link" />
+    <origin xyz="0 0 0.08" rpy="0 0 0" />
+    <axis xyz="0 0 1" />
+  </joint>
+  <link name="neck_link" />
+
+  <joint name="head_pan_joint" type="revolute">
+    <parent link="neck_link" />
+    <child link="pan_link" />
+    <origin xyz="0 0 0.04" rpy="0 0 0" />
+    <axis xyz="0 0 1" />
+    <limit lower="-1.0471975512" upper="1.0471975512" effort="1.0" velocity="1.0" />
+  </joint>
+  <link name="pan_link" />
+
+  <joint name="head_tilt_joint" type="revolute">
+    <parent link="pan_link" />
+    <child link="head_link" />
+    <origin xyz="0 0 0.04" rpy="0 0 0" />
+    <axis xyz="0 1 0" />
+    <limit lower="-0.6108652382" upper="0.6108652382" effort="1.0" velocity="1.0" />
+  </joint>
+  <link name="head_link" />
+
+  <joint name="camera_joint" type="fixed">
+    <parent link="head_link" />
+    <child link="camera_link" />
+    <origin xyz="0.04 0 0" rpy="0 0 0" />
+  </joint>
+  <link name="camera_link" />
+
+  <joint name="mic_array_joint" type="fixed">
+    <parent link="head_link" />
+    <child link="mic_array_link" />
+    <origin xyz="0.02 0 0.02" rpy="0 0 0" />
+  </joint>
+  <link name="mic_array_link" />
+
+  <joint name="speaker_joint" type="fixed">
+    <parent link="base_link" />
+    <child link="speaker_link" />
+    <origin xyz="0.03 0 -0.02" rpy="0 0 0" />
+  </joint>
+  <link name="speaker_link" />
+
+  <joint name="antenna_left_joint" type="revolute">
+    <parent link="head_link" />
+    <child link="antenna_left_link" />
+    <origin xyz="0 0.035 0.04" rpy="0 0 0" />
+    <axis xyz="1 0 0" />
+    <limit lower="-1.5707963268" upper="1.5707963268" effort="0.2" velocity="1.0" />
+  </joint>
+  <link name="antenna_left_link" />
+
+  <joint name="antenna_right_joint" type="revolute">
+    <parent link="head_link" />
+    <child link="antenna_right_link" />
+    <origin xyz="0 -0.035 0.04" rpy="0 0 0" />
+    <axis xyz="1 0 0" />
+    <limit lower="-1.5707963268" upper="1.5707963268" effort="0.2" velocity="1.0" />
+  </joint>
+  <link name="antenna_right_link" />
+</robot>

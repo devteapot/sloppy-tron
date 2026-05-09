@@ -1,0 +1,16 @@
+joints:
+  - name: body_yaw_joint
+    state_key: pose.bodyYaw
+    unit: degrees
+  - name: head_pan_joint
+    state_key: pose.head.pan
+    unit: degrees
+  - name: head_tilt_joint
+    state_key: pose.head.tilt
+    unit: degrees
+  - name: antenna_left_joint
+    state_key: pose.antennas.left
+    unit: degrees
+  - name: antenna_right_joint
+    state_key: pose.antennas.right
+    unit: degrees

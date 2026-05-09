@@ -31,14 +31,16 @@ ROS 2 body graph on Pi 5
 ## Repository Layout
 
 - `docs/spec.md` — current SloppyTron specification.
-- `ros/` — ROS 2 workspace notes and the current `ament_python` bridge
-  package.
+- `ros/` — ROS 2 workspace notes, the SLOP bridge package, and the deterministic
+  body baseline package.
 - `provider/` — SLOP adapter notes for the Python provider built on the SLOP
   Python SDK.
 - `src/sloppy_tron/provider/` — current `slop-ai` SDK adapter, provider
   contract, and fake backend.
 - `src/sloppy_tron/ros_bridge/` — ROS/SLOP bridge core shared by tests and ROS
   nodes.
+- `src/sloppy_tron/ros_body_baseline/` — pure-Python deterministic body model
+  used by the ROS baseline node.
 - `tests/` — provider contract, SDK adapter, and fake backend tests.
 - `firmware/` — microcontroller or servo bridge firmware.
 - `cad/` — printable parts, mounts, and mechanical references.
@@ -105,8 +107,10 @@ docker compose run --rm reachy-e2e ./docker/sloppy-consumer-reachy-smoke.sh mujo
 # ROS bridge checks.
 docker compose run --rm ros-jazzy ./docker/ros-check.sh
 docker compose run --rm ros-humble ./docker/ros-check.sh
-docker compose run --rm ros-jazzy ./docker/ros-smoke.sh
-docker compose run --rm ros-humble ./docker/ros-smoke.sh
+docker compose run --rm ros-jazzy ./docker/ros-smoke.sh fake
+docker compose run --rm ros-jazzy ./docker/ros-smoke.sh baseline
+docker compose run --rm ros-humble ./docker/ros-smoke.sh fake
+docker compose run --rm ros-humble ./docker/ros-smoke.sh baseline
 ```
 
 ## Status
@@ -115,6 +119,6 @@ Software scaffold in progress. The repo currently has a fake Python `body`
 provider using the `slop-ai` SDK, a Reachy Mini daemon backend for mockup/MuJoCo
 simulation behind the same SLOP consumer contract, a dedicated Reachy e2e Docker
 container for upstream daemon validation and Sloppy ConsumerHub discovery smoke,
-shared ROS bridge core logic, a first `ament_python` ROS package, and local
-Docker checks for Jazzy and Humble. No real hardware-control backend is
-implemented yet.
+shared ROS bridge core logic, two `ament_python` ROS packages including a
+deterministic Reachy-compatible ROS body baseline, and local Docker checks for
+Jazzy and Humble. No real hardware-control backend is implemented yet.

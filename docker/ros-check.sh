@@ -6,7 +6,7 @@ cd /workspace
 uv sync
 uv run ruff check .
 uv run ruff format --check .
-uv run mypy --strict src/sloppy_tron/provider src/sloppy_tron/ros_bridge
+uv run mypy --strict src/sloppy_tron/provider src/sloppy_tron/ros_bridge src/sloppy_tron/ros_body_baseline
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run pytest
 
 python3 -m pip install -e .
@@ -17,3 +17,4 @@ set +u
 source install/setup.bash
 set -u
 ros2 pkg executables sloppy_tron_ros_bridge
+ros2 pkg executables sloppy_tron_body_baseline

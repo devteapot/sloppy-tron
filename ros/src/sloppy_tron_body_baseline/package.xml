@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>sloppy_tron_body_baseline</name>
+  <version>0.0.0</version>
+  <description>Deterministic Reachy-compatible ROS body baseline for SloppyTron.</description>
+  <maintainer email="sloppy@example.invalid">SloppyTron maintainers</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_python</buildtool_depend>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>sloppy_tron_ros_bridge</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

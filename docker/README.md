@@ -65,18 +65,25 @@ docker compose run --rm ros-jazzy ./docker/ros-check.sh
 docker compose run --rm ros-humble ./docker/ros-check.sh
 ```
 
-Run the runtime smoke test for either distro:
+Run the runtime smoke tests for either distro:
 
 ```sh
-docker compose run --rm ros-jazzy ./docker/ros-smoke.sh
-docker compose run --rm ros-humble ./docker/ros-smoke.sh
+# Lightweight fake backend.
+docker compose run --rm ros-jazzy ./docker/ros-smoke.sh fake
+docker compose run --rm ros-humble ./docker/ros-smoke.sh fake
+
+# Deterministic Reachy-compatible ROS body baseline.
+docker compose run --rm ros-jazzy ./docker/ros-smoke.sh baseline
+docker compose run --rm ros-humble ./docker/ros-smoke.sh baseline
 ```
 
 The smoke script installs the shared package into the ROS Python environment,
-builds the ROS workspace, starts the fake body and SLOP bridge nodes, waits for
-the `body_state` and `body_command` topic endpoints to match, connects through
-the bridge's Unix SLOP socket, invokes `enable_motion`, invokes
-`look_at_angles`, and verifies the final pose through SLOP state.
+builds the ROS workspace, starts either the fake body or deterministic baseline
+body plus the SLOP bridge nodes, waits for the `body_state` and `body_command`
+topic endpoints to match, connects through the bridge's Unix SLOP socket,
+invokes `enable_motion`, invokes `look_at_angles`, and verifies the final pose
+through SLOP state. Baseline mode also publishes `sensor_msgs/JointState` for
+`body_yaw_joint`, `head_pan_joint`, `head_tilt_joint`, and both antenna joints.
 
 Open an interactive shell:
 
