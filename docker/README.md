@@ -97,8 +97,9 @@ docker compose run --rm ros-humble
 
 The check script runs Python lint/type/tests, installs the shared
 `sloppy_tron` package into the container's ROS Python environment, builds the
-ROS workspace with `colcon`, lists the bridge executables, and runs the ROS
-package integration tests with `colcon test`.
+ROS workspace with `colcon`, lists the bridge/baseline executables, verifies the
+SloppyTron description package is installed, and runs the ROS package
+integration tests with `colcon test`.
 
 The compose setup keeps ROS `build/`, `install/`, and `log/` directories in
 named Docker volumes per distro so Humble and Jazzy do not trample each other.

@@ -1,0 +1,14 @@
+joints:
+  body_yaw: body_yaw_joint
+  head_pan: head_pan_joint
+  head_tilt: head_tilt_joint
+  antenna_left: antenna_left_joint
+  antenna_right: antenna_right_joint
+
+visual_contract:
+  mascot_reference: "~/dev/slop/logo/sloppy.svg"
+  palette:
+    slop_blue: "#4A8FE7"
+    slop_dark_blue: "#2B80CF"
+    slop_eye_green: "#98F5A6"
+    feature_black: "#000000"

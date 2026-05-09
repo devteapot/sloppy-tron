@@ -31,8 +31,10 @@ ROS 2 body graph on Pi 5
 ## Repository Layout
 
 - `docs/spec.md` — current SloppyTron specification.
-- `ros/` — ROS 2 workspace notes, the SLOP bridge package, and the deterministic
-  body baseline package.
+- `docs/sloppytron-v0-body-design.md` — Reachy-inspired, Sloppy-mascot body
+  design direction for the first custom shell.
+- `ros/` — ROS 2 workspace notes, the SLOP bridge package, the deterministic
+  body baseline package, and the SloppyTron visual description package.
 - `provider/` — SLOP adapter notes for the Python provider built on the SLOP
   Python SDK.
 - `src/sloppy_tron/provider/` — current `slop-ai` SDK adapter, provider
@@ -43,7 +45,8 @@ ROS 2 body graph on Pi 5
   used by the ROS baseline node.
 - `tests/` — provider contract, SDK adapter, and fake backend tests.
 - `firmware/` — microcontroller or servo bridge firmware.
-- `cad/` — printable parts, mounts, and mechanical references.
+- `cad/` — printable parts, mounts, mechanical references, and the SloppyTron v0
+  CAD workspace.
 - `bom/` — parts list, wiring, power, and purchasing notes.
 - `config/` — example Sloppy/provider configuration.
 - `docker/` — local macOS Reachy e2e and ROS dev containers.
@@ -119,6 +122,7 @@ Software scaffold in progress. The repo currently has a fake Python `body`
 provider using the `slop-ai` SDK, a Reachy Mini daemon backend for mockup/MuJoCo
 simulation behind the same SLOP consumer contract, a dedicated Reachy e2e Docker
 container for upstream daemon validation and Sloppy ConsumerHub discovery smoke,
-shared ROS bridge core logic, two `ament_python` ROS packages including a
-deterministic Reachy-compatible ROS body baseline, and local Docker checks for
-Jazzy and Humble. No real hardware-control backend is implemented yet.
+shared ROS bridge core logic, three `ament_python` ROS packages including a
+deterministic Reachy-compatible ROS body baseline and a Sloppy mascot-inspired
+visual description package, and local Docker checks for Jazzy and Humble. No real
+hardware-control backend is implemented yet.

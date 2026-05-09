@@ -1,0 +1,228 @@
+<?xml version="1.0"?>
+<robot name="sloppy_tron_v0" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!--
+    SloppyTron v0: Reachy-inspired companion kinematics with Sloppy mascot visual DNA.
+    Mascot reference: ~/dev/slop/logo/sloppy.svg
+  -->
+
+  <material name="slop_blue"><color rgba="0.290 0.561 0.906 1.0" /></material>
+  <material name="slop_dark_blue"><color rgba="0.169 0.502 0.812 1.0" /></material>
+  <material name="slop_eye_green"><color rgba="0.596 0.961 0.651 1.0" /></material>
+  <material name="feature_black"><color rgba="0.0 0.0 0.0 1.0" /></material>
+  <material name="base_graphite"><color rgba="0.08 0.09 0.11 1.0" /></material>
+
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 0.012" rpy="0 0 0" />
+      <geometry><cylinder radius="0.082" length="0.024" /></geometry>
+      <material name="base_graphite" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.012" rpy="0 0 0" />
+      <geometry><cylinder radius="0.085" length="0.026" /></geometry>
+    </collision>
+  </link>
+
+  <joint name="body_yaw_joint" type="continuous">
+    <parent link="base_link" />
+    <child link="torso_link" />
+    <origin xyz="0 0 0.026" rpy="0 0 0" />
+    <axis xyz="0 0 1" />
+  </joint>
+
+  <link name="torso_link">
+    <visual>
+      <origin xyz="0 0 0.058" rpy="0 0 0" />
+      <geometry><mesh filename="package://sloppy_tron_description/meshes/visual/body_pod.stl" /></geometry>
+      <material name="slop_blue" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.058" rpy="0 0 0" />
+      <geometry><sphere radius="0.074" /></geometry>
+    </collision>
+  </link>
+
+  <joint name="speaker_joint" type="fixed">
+    <parent link="torso_link" />
+    <child link="speaker_link" />
+    <origin xyz="0.052 0 0.040" rpy="0 1.5708 0" />
+  </joint>
+  <link name="speaker_link">
+    <visual>
+      <geometry><cylinder radius="0.024" length="0.006" /></geometry>
+      <material name="feature_black" />
+    </visual>
+  </link>
+
+  <joint name="left_side_fin_joint" type="fixed">
+    <parent link="torso_link" />
+    <child link="left_side_fin_link" />
+    <origin xyz="0 0.078 0.058" rpy="0 0.15 0" />
+  </joint>
+  <link name="left_side_fin_link">
+    <visual>
+      <geometry><mesh filename="package://sloppy_tron_description/meshes/visual/side_fin.stl" /></geometry>
+      <material name="slop_dark_blue" />
+    </visual>
+  </link>
+
+  <joint name="right_side_fin_joint" type="fixed">
+    <parent link="torso_link" />
+    <child link="right_side_fin_link" />
+    <origin xyz="0 -0.078 0.058" rpy="0 -0.15 0" />
+  </joint>
+  <link name="right_side_fin_link">
+    <visual>
+      <geometry><mesh filename="package://sloppy_tron_description/meshes/visual/side_fin.stl" /></geometry>
+      <material name="slop_dark_blue" />
+    </visual>
+  </link>
+
+  <joint name="neck_mount_joint" type="fixed">
+    <parent link="torso_link" />
+    <child link="neck_link" />
+    <origin xyz="0 0 0.128" rpy="0 0 0" />
+  </joint>
+  <link name="neck_link">
+    <visual>
+      <origin xyz="0 0 0.012" rpy="0 0 0" />
+      <geometry><cylinder radius="0.026" length="0.024" /></geometry>
+      <material name="base_graphite" />
+    </visual>
+  </link>
+
+  <joint name="head_pan_joint" type="revolute">
+    <parent link="neck_link" />
+    <child link="pan_link" />
+    <origin xyz="0 0 0.024" rpy="0 0 0" />
+    <axis xyz="0 0 1" />
+    <limit lower="-1.0471975512" upper="1.0471975512" effort="1.0" velocity="1.0" />
+  </joint>
+  <link name="pan_link" />
+
+  <joint name="head_tilt_joint" type="revolute">
+    <parent link="pan_link" />
+    <child link="head_link" />
+    <origin xyz="0 0 0.030" rpy="0 0 0" />
+    <axis xyz="0 1 0" />
+    <limit lower="-0.6108652382" upper="0.6108652382" effort="1.0" velocity="1.0" />
+  </joint>
+
+  <link name="head_link">
+    <visual>
+      <geometry><mesh filename="package://sloppy_tron_description/meshes/visual/head_shell.stl" /></geometry>
+      <material name="slop_blue" />
+    </visual>
+    <collision>
+      <geometry><sphere radius="0.084" /></geometry>
+    </collision>
+  </link>
+
+  <joint name="camera_joint" type="fixed">
+    <parent link="head_link" />
+    <child link="camera_link" />
+    <origin xyz="0.069 0 0.010" rpy="0 1.5708 0" />
+  </joint>
+  <link name="camera_link">
+    <visual>
+      <geometry><cylinder radius="0.011" length="0.008" /></geometry>
+      <material name="feature_black" />
+    </visual>
+  </link>
+
+  <joint name="mic_array_joint" type="fixed">
+    <parent link="head_link" />
+    <child link="mic_array_link" />
+    <origin xyz="0.068 0 -0.033" rpy="0 1.5708 0" />
+  </joint>
+  <link name="mic_array_link">
+    <visual>
+      <geometry><cylinder radius="0.019" length="0.004" /></geometry>
+      <material name="feature_black" />
+    </visual>
+  </link>
+
+  <joint name="left_eye_joint" type="fixed">
+    <parent link="head_link" />
+    <child link="left_eye_link" />
+    <origin xyz="0.066 0.035 0.025" rpy="0 0 0" />
+  </joint>
+  <link name="left_eye_link">
+    <visual>
+      <geometry><mesh filename="package://sloppy_tron_description/meshes/visual/eye_lens.stl" /></geometry>
+      <material name="slop_eye_green" />
+    </visual>
+    <visual>
+      <origin xyz="0.0035 0 0" rpy="0 0 0" />
+      <geometry><mesh filename="package://sloppy_tron_description/meshes/visual/eye_ring.stl" /></geometry>
+      <material name="feature_black" />
+    </visual>
+    <visual>
+      <origin xyz="0.006 0.006 0.003" rpy="0 0 0" />
+      <geometry><mesh filename="package://sloppy_tron_description/meshes/visual/pupil.stl" /></geometry>
+      <material name="feature_black" />
+    </visual>
+  </link>
+
+  <joint name="right_eye_joint" type="fixed">
+    <parent link="head_link" />
+    <child link="right_eye_link" />
+    <origin xyz="0.066 -0.035 0.025" rpy="0 0 0" />
+  </joint>
+  <link name="right_eye_link">
+    <visual>
+      <geometry><mesh filename="package://sloppy_tron_description/meshes/visual/eye_lens.stl" /></geometry>
+      <material name="slop_eye_green" />
+    </visual>
+    <visual>
+      <origin xyz="0.0035 0 0" rpy="0 0 0" />
+      <geometry><mesh filename="package://sloppy_tron_description/meshes/visual/eye_ring.stl" /></geometry>
+      <material name="feature_black" />
+    </visual>
+    <visual>
+      <origin xyz="0.006 -0.006 0.003" rpy="0 0 0" />
+      <geometry><mesh filename="package://sloppy_tron_description/meshes/visual/pupil.stl" /></geometry>
+      <material name="feature_black" />
+    </visual>
+  </link>
+
+  <joint name="nose_joint" type="fixed">
+    <parent link="head_link" />
+    <child link="nose_link" />
+    <origin xyz="0.071 0 -0.006" rpy="0 0 0" />
+  </joint>
+  <link name="nose_link">
+    <visual>
+      <geometry><mesh filename="package://sloppy_tron_description/meshes/visual/nose_diamond.stl" /></geometry>
+      <material name="feature_black" />
+    </visual>
+  </link>
+
+  <joint name="antenna_left_joint" type="revolute">
+    <parent link="head_link" />
+    <child link="antenna_left_link" />
+    <origin xyz="0.000 0.050 0.062" rpy="0.35 0.00 -0.22" />
+    <axis xyz="1 0 0" />
+    <limit lower="-1.5707963268" upper="1.5707963268" effort="0.2" velocity="1.0" />
+  </joint>
+  <link name="antenna_left_link">
+    <visual>
+      <geometry><mesh filename="package://sloppy_tron_description/meshes/visual/ear_fin.stl" /></geometry>
+      <material name="slop_blue" />
+    </visual>
+  </link>
+
+  <joint name="antenna_right_joint" type="revolute">
+    <parent link="head_link" />
+    <child link="antenna_right_link" />
+    <origin xyz="0.000 -0.050 0.062" rpy="-0.35 0.00 0.22" />
+    <axis xyz="1 0 0" />
+    <limit lower="-1.5707963268" upper="1.5707963268" effort="0.2" velocity="1.0" />
+  </joint>
+  <link name="antenna_right_link">
+    <visual>
+      <geometry><mesh filename="package://sloppy_tron_description/meshes/visual/ear_fin.stl" /></geometry>
+      <material name="slop_blue" />
+    </visual>
+  </link>
+</robot>
