@@ -1,36 +1,36 @@
 {
   "primary": {
     "sloppy_bbox_m": [
-      0.155,
-      0.1562,
-      0.3904
+      0.21,
+      0.1633,
+      0.3163
     ],
     "body_source": "Reachy Mini robot_no_collision.urdf STL body/mechanics; Reachy head/antenna visuals skipped",
     "head_source": "/Users/sloppy/dev/slop/logo/sloppy.svg",
     "svg_reference_loaded_in_scene": true,
-    "orientation": "front faces negative Y; same orientation used for Reachy reference comparison",
+    "orientation": "Reachy +X camera/front rotated to scene -Y; same orientation used for Reachy reference comparison",
     "reachy_body_visuals_imported_for_sloppy": 141,
     "reachy_body_non_empty_meshes_for_sloppy": 141
   },
   "comparison": {
     "sloppy_bbox_m": [
-      0.155,
-      0.1562,
-      0.3904
+      0.21,
+      0.1633,
+      0.3163
     ],
     "reachy_reference_bbox_m": [
-      0.155,
       0.1562,
+      0.155,
       0.3911
     ],
     "reachy_reference_visuals_imported": 161,
     "reachy_reference_non_empty_meshes": 161,
     "reachy_reference_missing_meshes": [],
-    "reachy_reference_orientation": "same as Sloppy body: URDF front/camera side faces negative Y",
+    "reachy_reference_orientation": "raw URDF +X camera/front rotated to scene -Y",
     "svg_reference_loaded_in_scene": true,
     "sloppy_body_source": "Reachy Mini body/base/Stewart/speaker STL geometry imported from robot_no_collision.urdf",
     "sloppy_head_source": "/Users/sloppy/dev/slop/logo/sloppy.svg",
-    "sloppy_head_strategy": "mascot SVG body/ears/eyes/nose curves scaled onto Reachy head envelope; Reachy head and antenna STL visuals skipped",
+    "sloppy_head_strategy": "mascot SVG body/ears/arms/eyes/nose scaled upright onto Reachy head envelope; Reachy head and antenna STL visuals skipped",
     "internal_reserved_volumes": [
       "Pi Camera Module 3: 25 x 24 x 12 mm",
       "XVF3800-style 4-mic array: diameter 65 x 6 mm",

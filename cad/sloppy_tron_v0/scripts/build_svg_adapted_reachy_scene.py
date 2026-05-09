@@ -43,6 +43,19 @@ COMPARISON_GLB = EXPORT_DIR / "sloppy_tron_v0_reachy_comparison.glb"
 COMPARISON_PREVIEW = EXPORT_DIR / "sloppy_tron_v0_reachy_comparison_preview.png"
 COMPARISON_METRICS = EXPORT_DIR / "sloppy_tron_v0_reachy_comparison_metrics.json"
 
+# The Reachy URDF/STL camera/front side points along +X in Blender after import.
+# Review renders use camera/front as -Y, so rotate all imported Reachy geometry
+# around Z by -90 degrees before placing it in the scene.
+REACHY_FRONT_TO_SCENE_FRONT = Matrix.Rotation(-math.pi / 2, 4, "Z")
+
+# Head placement is intentionally close to the original Reachy head envelope
+# (roughly z 0.155-0.25 m), with only the Sloppy ear/antenna silhouette rising
+# higher. The previous pass put the full mascot head up near antenna height and
+# left a visible gap above the body.
+HEAD_CENTER_Z = 0.244
+HEAD_FRONT_Y = -0.071
+HEAD_SHELL_HEIGHT = 0.142
+
 # Sloppy palette from ~/dev/slop/logo/sloppy.svg
 SLOP_BLUE = (0x4A / 255.0, 0x8F / 255.0, 0xE7 / 255.0, 1.0)
 SLOP_DARK_BLUE = (0x2B / 255.0, 0x80 / 255.0, 0xCF / 255.0, 1.0)
@@ -53,7 +66,7 @@ DARK_GRAPHITE = (0.015, 0.017, 0.02, 1.0)
 REF_GREY = (0.55, 0.58, 0.60, 0.72)
 REF_DARK = (0.26, 0.28, 0.30, 0.72)
 WARM_WHITE = (0.86, 0.90, 0.92, 1.0)
-BOARD = (0.035, 0.042, 0.052, 0.72)
+BOARD = (0.020, 0.025, 0.034, 1.0)
 CYAN_GLASS = (0.1, 0.9, 1.0, 0.28)
 AMBER_GLASS = (1.0, 0.58, 0.15, 0.26)
 PURPLE_GLASS = (0.70, 0.28, 1.0, 0.24)
@@ -493,16 +506,23 @@ def transform_svg_to_vertical_plane(
     center: tuple[float, float, float],
     height: float,
     z_tilt_deg: float = 0.0,
+    flip_vertical: bool = True,
 ) -> None:
     mins, maxs = world_bbox(objs)
     src_center = Vector(((mins.x + maxs.x) / 2.0, (mins.y + maxs.y) / 2.0, 0.0))
     src_height = maxs.y - mins.y
     scale = height / src_height
+    # Blender's SVG importer already flips the SVG canvas Y direction relative
+    # to common screen-space SVG coordinates. Without this source-space Y flip,
+    # the Sloppy ears land on the bottom and the side reference appears upside
+    # down. Keep this default on for all Sloppy logo imports.
+    vertical_flip = Matrix.Scale(-1, 4, Vector((0, 1, 0))) if flip_vertical else Matrix.Identity(4)
     base = (
         Matrix.Translation(Vector(center))
         @ Matrix.Rotation(math.radians(z_tilt_deg), 4, "Z")
         @ Matrix.Rotation(-math.pi / 2, 4, "X")
         @ Matrix.Scale(scale, 4)
+        @ vertical_flip
         @ Matrix.Translation(-src_center)
     )
     for obj in objs:
@@ -553,26 +573,26 @@ def create_svg_head(center_x: float, mats: dict[str, bpy.types.Material]) -> lis
 
     # Soft 3D rear volume sized to the Reachy head envelope, with the actual SVG
     # silhouette used as the visible front plate and facial geometry.
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=96, ring_count=48, radius=1, location=(center_x, -0.004, 0.315))
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=96, ring_count=48, radius=1, location=(center_x, -0.004, HEAD_CENTER_Z))
     rear = bpy.context.object
     rear.name = "sloppy_svg_head__rounded_rear_volume"
-    rear.scale = (0.060, 0.044, 0.066)
+    rear.scale = (0.060, 0.044, 0.060)
     assign_mat(rear, mats["slop_blue"])
     bpy.ops.object.shade_smooth()
     objects.append(rear)
 
     # A shallow black shadow/collar behind the SVG face reduces the flat-card look.
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=64, ring_count=24, radius=1, location=(center_x, -0.047, 0.315))
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=64, ring_count=24, radius=1, location=(center_x, -0.047, HEAD_CENTER_Z))
     shadow = bpy.context.object
     shadow.name = "sloppy_svg_head__black_recess_behind_faceplate"
-    shadow.scale = (0.0615, 0.010, 0.0675)
+    shadow.scale = (0.0615, 0.010, 0.0615)
     assign_mat(shadow, mats["dark_graphite"])
     bpy.ops.object.shade_smooth()
     objects.append(shadow)
 
     shell = import_svg_objects("svg_head_faceplate_shell")
-    shell = keep_only_svg_parts(shell, {"body", "left-ear", "right-ear"})
-    transform_svg_to_vertical_plane(shell, center=(center_x, -0.060, 0.316), height=0.146)
+    shell = keep_only_svg_parts(shell, {"body", "left-ear", "right-ear", "left-arm", "right-arm"})
+    transform_svg_to_vertical_plane(shell, center=(center_x, -0.060, HEAD_CENTER_Z), height=HEAD_SHELL_HEIGHT)
     set_svg_materials(shell, mats)
     # Values are pre-scale local units; after SVG scale this produces a raised,
     # manufacturable plate instead of a purely flat sticker.
@@ -589,7 +609,7 @@ def create_svg_head(center_x: float, mats: dict[str, bpy.types.Material]) -> lis
     # Ear hinge pucks: SVG silhouette supplies the shape; these show how the
     # geometry mounts onto the real Reachy-like head envelope.
     for side, sx in [("left", -0.044), ("right", 0.044)]:
-        bpy.ops.mesh.primitive_uv_sphere_add(segments=32, ring_count=16, radius=1, location=(center_x + sx, -0.050, 0.377))
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=32, ring_count=16, radius=1, location=(center_x + sx, -0.050, HEAD_CENTER_Z + 0.058))
         puck = bpy.context.object
         puck.name = f"sloppy_svg_head__{side}_ear_black_mount"
         puck.scale = (0.009, 0.007, 0.009)
@@ -597,23 +617,217 @@ def create_svg_head(center_x: float, mats: dict[str, bpy.types.Material]) -> lis
         bpy.ops.object.shade_smooth()
         objects.append(puck)
 
-    # Simple mechanical adapter from the reused Reachy Stewart platform to the
-    # mascot head. This is intentionally visible; it helps compare head envelope
-    # against the body instead of hiding the transition.
-    bpy.ops.mesh.primitive_cylinder_add(vertices=64, radius=0.037, depth=0.018, location=(center_x, 0.0, 0.238))
+    objects.extend(add_six_dof_head_body_connection(center_x, mats))
+    objects.extend(add_mascot_side_arms(center_x, mats))
+
+    return objects
+
+
+def add_cylinder_between(
+    *,
+    name: str,
+    start: Vector,
+    end: Vector,
+    radius: float,
+    mat: bpy.types.Material,
+    vertices: int = 24,
+) -> bpy.types.Object:
+    mid = (start + end) / 2.0
+    direction = end - start
+    length = direction.length
+    bpy.ops.mesh.primitive_cylinder_add(vertices=vertices, radius=radius, depth=length, location=mid)
+    obj = bpy.context.object
+    obj.name = name
+    obj.rotation_euler = direction.to_track_quat("Z", "Y").to_euler()
+    assign_mat(obj, mat)
+    bpy.ops.object.shade_smooth()
+    return obj
+
+
+def add_joint_ball(
+    *,
+    name: str,
+    location: Vector,
+    radius: float,
+    mat: bpy.types.Material,
+) -> bpy.types.Object:
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=12, radius=radius, location=location)
+    obj = bpy.context.object
+    obj.name = name
+    assign_mat(obj, mat)
+    bpy.ops.object.shade_smooth()
+    return obj
+
+
+def add_six_dof_head_body_connection(center_x: float, mats: dict[str, bpy.types.Material]) -> list[bpy.types.Object]:
+    """Add the missing visible Stewart/6-DOF rod stage between body and head."""
+    objects: list[bpy.types.Object] = []
+
+    lower_z = 0.158
+    upper_z = 0.202
+    lower_radius = 0.050
+    upper_radius = 0.034
+
+    for z, radius, depth, name, mat_key in [
+        (lower_z, lower_radius, 0.006, "lower_body_stewart_plate", "dark_graphite"),
+        (upper_z, upper_radius, 0.006, "upper_head_stewart_plate", "graphite"),
+    ]:
+        bpy.ops.mesh.primitive_torus_add(
+            major_radius=radius,
+            minor_radius=depth / 2.0,
+            major_segments=96,
+            minor_segments=8,
+            location=(center_x, 0.0, z),
+        )
+        ring = bpy.context.object
+        ring.name = f"sloppy_reachy_body_adapter__{name}"
+        assign_mat(ring, mats[mat_key])
+        bpy.ops.object.shade_smooth()
+        objects.append(ring)
+
+    # Central compression/mast visually closes the gap even from a straight-on
+    # view; the six rods show the Stewart-style degrees of freedom.
+    objects.append(
+        add_cylinder_between(
+            name="sloppy_reachy_body_adapter__central_compression_post",
+            start=Vector((center_x, 0.0, lower_z - 0.006)),
+            end=Vector((center_x, 0.0, HEAD_CENTER_Z - 0.055)),
+            radius=0.010,
+            mat=mats["dark_graphite"],
+            vertices=32,
+        )
+    )
+
+    for idx in range(6):
+        lower_angle = math.radians(idx * 60.0 + 12.0)
+        upper_angle = math.radians(idx * 60.0 + 42.0)
+        lower = Vector(
+            (
+                center_x + math.cos(lower_angle) * lower_radius,
+                math.sin(lower_angle) * lower_radius,
+                lower_z,
+            )
+        )
+        upper = Vector(
+            (
+                center_x + math.cos(upper_angle) * upper_radius,
+                math.sin(upper_angle) * upper_radius,
+                upper_z,
+            )
+        )
+        objects.append(
+            add_cylinder_between(
+                name=f"sloppy_reachy_body_adapter__six_dof_rod_{idx + 1}",
+                start=lower,
+                end=upper,
+                radius=0.0034,
+                mat=mats["graphite"],
+                vertices=16,
+            )
+        )
+        objects.append(
+            add_joint_ball(
+                name=f"sloppy_reachy_body_adapter__lower_ball_joint_{idx + 1}",
+                location=lower,
+                radius=0.0052,
+                mat=mats["black"],
+            )
+        )
+        objects.append(
+            add_joint_ball(
+                name=f"sloppy_reachy_body_adapter__upper_ball_joint_{idx + 1}",
+                location=upper,
+                radius=0.0048,
+                mat=mats["black"],
+            )
+        )
+
+    # Front-facing review rods: the full circular Stewart set above is correct,
+    # but from a straight-on render it can disappear behind the shell. These six
+    # slim external rods keep the 6-DOF head/body linkage unambiguous in PNG/GLB
+    # review without changing the underlying Reachy-derived body envelope.
+    front_lower_y = -0.078
+    front_upper_y = -0.044
+    front_lower_z = 0.170
+    front_upper_z = 0.232
+    for idx, x_offset in enumerate([-0.064, -0.038, -0.013, 0.013, 0.038, 0.064], start=1):
+        upper_x_offset = x_offset * 0.55 + (0.006 if idx % 2 == 0 else -0.006)
+        start = Vector((center_x + x_offset, front_lower_y, front_lower_z))
+        end = Vector((center_x + upper_x_offset, front_upper_y, front_upper_z))
+        objects.append(
+            add_cylinder_between(
+                name=f"sloppy_reachy_body_adapter__front_visible_six_dof_rod_{idx}",
+                start=start,
+                end=end,
+                radius=0.0062,
+                mat=mats["black"],
+                vertices=16,
+            )
+        )
+        objects.append(
+            add_joint_ball(
+                name=f"sloppy_reachy_body_adapter__front_lower_ball_joint_{idx}",
+                location=start,
+                radius=0.0072,
+                mat=mats["black"],
+            )
+        )
+        objects.append(
+            add_joint_ball(
+                name=f"sloppy_reachy_body_adapter__front_upper_ball_joint_{idx}",
+                location=end,
+                radius=0.0068,
+                mat=mats["black"],
+            )
+        )
+
+    bpy.ops.mesh.primitive_cylinder_add(
+        vertices=64,
+        radius=0.037,
+        depth=0.014,
+        location=(center_x, 0.0, HEAD_CENTER_Z - 0.058),
+    )
     collar = bpy.context.object
-    collar.name = "sloppy_reachy_body_adapter__head_neck_collar"
+    collar.name = "sloppy_reachy_body_adapter__head_socket_collar_touching_body"
     assign_mat(collar, mats["graphite"])
     bpy.ops.object.shade_smooth()
     objects.append(collar)
 
-    bpy.ops.mesh.primitive_cylinder_add(vertices=64, radius=0.052, depth=0.010, location=(center_x, 0.0, 0.219))
-    bearing = bpy.context.object
-    bearing.name = "sloppy_reachy_body_adapter__upper_bearing_ring"
-    assign_mat(bearing, mats["dark_graphite"])
-    bpy.ops.object.shade_smooth()
-    objects.append(bearing)
+    return objects
 
+
+def add_mascot_side_arms(center_x: float, mats: dict[str, bpy.types.Material]) -> list[bpy.types.Object]:
+    """Add physical side arms so the SVG arm affordance is not lost on the Reachy body."""
+    objects: list[bpy.types.Object] = []
+    for side, sign in [("left", -1.0), ("right", 1.0)]:
+        shoulder = Vector((center_x + sign * 0.060, -0.018, 0.200))
+        hand = Vector((center_x + sign * 0.094, -0.030, 0.153))
+        objects.append(
+            add_cylinder_between(
+                name=f"sloppy_svg_body_arm__{side}_dark_blue_flipper",
+                start=shoulder,
+                end=hand,
+                radius=0.008,
+                mat=mats["slop_dark_blue"],
+                vertices=24,
+            )
+        )
+        objects.append(
+            add_joint_ball(
+                name=f"sloppy_svg_body_arm__{side}_black_shoulder_mount",
+                location=shoulder,
+                radius=0.010,
+                mat=mats["black"],
+            )
+        )
+        objects.append(
+            add_joint_ball(
+                name=f"sloppy_svg_body_arm__{side}_rounded_hand",
+                location=hand,
+                radius=0.011,
+                mat=mats["slop_dark_blue"],
+            )
+        )
     return objects
 
 
@@ -686,11 +900,11 @@ def create_svg_face_mesh_details(center_x: float, mats: dict[str, bpy.types.Mate
     renders, GLB viewers, and from oblique angles.
     """
     objects: list[bpy.types.Object] = []
-    scale = 0.146 / 158.0
+    scale = HEAD_SHELL_HEIGHT / 158.0
     svg_center_x = 76.6268
     svg_center_y = 79.0
-    front_y = -0.071
-    center_z = 0.316
+    front_y = HEAD_FRONT_Y
+    center_z = HEAD_CENTER_Z
 
     def map_pt(x: float, y: float) -> tuple[float, float, float]:
         return (center_x + (x - svg_center_x) * scale, front_y, center_z + (svg_center_y - y) * scale)
@@ -748,7 +962,7 @@ def add_internal_reservation_volumes(center_x: float, mats: dict[str, bpy.types.
     objects: list[bpy.types.Object] = []
 
     # Raspberry Pi Camera Module 3 board envelope: 25 x 24 x ~11.5 mm.
-    bpy.ops.mesh.primitive_cube_add(size=1, location=(center_x, -0.036, 0.318))
+    bpy.ops.mesh.primitive_cube_add(size=1, location=(center_x, -0.036, HEAD_CENTER_Z + 0.006))
     cam = bpy.context.object
     cam.name = "reserved_internal_volume__pi_camera_module_3_25x24x12mm"
     cam.dimensions = (0.025, 0.012, 0.024)
@@ -763,7 +977,7 @@ def add_internal_reservation_volumes(center_x: float, mats: dict[str, bpy.types.
         radius=0.0325,
         depth=0.006,
         rotation=(math.pi / 2, 0, 0),
-        location=(center_x, -0.038, 0.263),
+        location=(center_x, -0.038, HEAD_CENTER_Z - 0.043),
     )
     mic = bpy.context.object
     mic.name = "reserved_internal_volume__xvf3800_four_mic_array_d65x6mm"
@@ -787,10 +1001,80 @@ def add_internal_reservation_volumes(center_x: float, mats: dict[str, bpy.types.
     objects.append(spk)
 
     label_x = center_x + 0.092
-    add_text("camera 25×24×12", location=(label_x, -0.067, 0.352), size=0.0062, mat_name="text_cyan")
-    add_text("4-mic array Ø65", location=(label_x, -0.067, 0.238), size=0.0062, mat_name="text_amber")
+    add_text("camera 25×24×12", location=(label_x, -0.067, HEAD_CENTER_Z + 0.040), size=0.0062, mat_name="text_cyan")
+    add_text("4-mic array Ø65", location=(label_x, -0.067, HEAD_CENTER_Z - 0.064), size=0.0062, mat_name="text_amber")
     add_text("5W speaker Ø58", location=(label_x, -0.067, 0.045), size=0.0062, mat_name="text_purple")
 
+    return objects
+
+
+def add_svg_reference_feature_overlay(
+    *,
+    center: tuple[float, float, float],
+    height: float,
+    mats: dict[str, bpy.types.Material],
+) -> list[bpy.types.Object]:
+    """High-contrast upright face landmarks on the side SVG board.
+
+    The actual imported SVG curves stay on the board. This overlay makes the
+    reference readable in the review PNG even when the curves are anti-aliased or
+    compressed by the camera.
+    """
+    objects: list[bpy.types.Object] = []
+    scale = height / 158.0
+    svg_center_x = 76.6268
+    svg_center_y = 79.0
+    front_y = center[1] - 0.014
+
+    def map_pt(x: float, y: float) -> tuple[float, float, float]:
+        return (
+            center[0] + (x - svg_center_x) * scale,
+            front_y,
+            center[2] + (svg_center_y - y) * scale,
+        )
+
+    eye_radius = 26.5 * scale
+    pupil_radius = 8.5 * scale
+    for side, eye, pupil in [
+        ("left", map_pt(47.1714, 60.0454), map_pt(55.1714, 60.0454)),
+        ("right", map_pt(106.171, 60.0454), map_pt(99.1714, 60.0454)),
+    ]:
+        objects.append(
+            add_face_disc(
+                name=f"side_svg_readability_overlay__{side}_green_eye",
+                location=eye,
+                radius=eye_radius,
+                depth=0.0018,
+                mat=mats["eye_green"],
+            )
+        )
+        objects.append(
+            add_eye_ring(
+                name=f"side_svg_readability_overlay__{side}_black_eye_ring",
+                location=(eye[0], front_y - 0.0014, eye[2]),
+                radius=eye_radius,
+                mat=mats["black"],
+            )
+        )
+        objects.append(
+            add_face_disc(
+                name=f"side_svg_readability_overlay__{side}_black_pupil",
+                location=(pupil[0], front_y - 0.0025, pupil[2]),
+                radius=pupil_radius,
+                depth=0.0018,
+                mat=mats["black"],
+            )
+        )
+
+    nose_pts = [map_pt(71.1714, 82.0454), map_pt(76.6714, 73.5454), map_pt(82.1714, 82.0454)]
+    objects.append(
+        add_flat_triangle(
+            name="side_svg_readability_overlay__black_nose",
+            points_xz=[(p[0], p[2]) for p in nose_pts],
+            y=front_y - 0.0035,
+            mat=mats["black"],
+        )
+    )
     return objects
 
 
@@ -806,7 +1090,7 @@ def add_svg_reference_board(
     bpy.ops.mesh.primitive_cube_add(size=1, location=(center[0], center[1] + 0.004, center[2]))
     board = bpy.context.object
     board.name = "side_loaded_reference_svg__dark_backing_card"
-    board.dimensions = (height * 0.82, 0.004, height * 1.10)
+    board.dimensions = (height * 1.12, 0.004, height * 1.18)
     assign_mat(board, mats["board"])
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
     objects.append(board)
@@ -818,8 +1102,9 @@ def add_svg_reference_board(
     for obj in svg_objs:
         obj.name = "side_loaded_reference_svg__" + obj.name
     objects.extend(svg_objs)
+    objects.extend(add_svg_reference_feature_overlay(center=center, height=height, mats=mats))
 
-    objects.append(add_text(label, location=(center[0], center[1] - 0.012, center[2] - height * 0.62), size=0.0075))
+    objects.append(add_text(label, location=(center[0], center[1] - 0.012, center[2] - height * 0.68), size=0.0075))
     return objects
 
 
@@ -871,18 +1156,18 @@ def build_primary_scene() -> dict[str, object]:
 
     sloppy_body = import_reachy_assembly(
         collection_name="sloppy_reused_reachy_body_geometry",
-        root_matrix=Matrix.Identity(4),
+        root_matrix=REACHY_FRONT_TO_SCENE_FRONT,
         mats=mats,
         mode="sloppy",
         skip_stems=HEAD_REPLACEMENT_STEMS | ANTENNA_REPLACEMENT_STEMS,
     )
     sloppy_head = create_svg_head(0.0, mats)
     volumes = add_internal_reservation_volumes(0.0, mats)
-    add_svg_reference_board(center=(0.170, -0.070, 0.283), height=0.118, mats=mats)
+    add_svg_reference_board(center=(0.175, -0.070, 0.245), height=0.150, mats=mats)
 
-    add_text("SloppyTron v0.3\nReachy body + SVG head", location=(0.0, -0.080, 0.430), size=0.009)
+    add_text("SloppyTron v0.4\nReachy body + corrected SVG head", location=(0.0, -0.080, 0.365), size=0.009)
     add_text("front aligned: -Y", location=(-0.145, -0.060, 0.032), size=0.007)
-    add_camera_and_light(target=Vector((0.050, 0.0, 0.225)), radius=0.78, z=0.31, focal_length=48)
+    add_camera_and_light(target=Vector((0.050, 0.0, 0.190)), radius=0.78, z=0.285, focal_length=48)
 
     all_sloppy = sloppy_body.objects + sloppy_head + volumes
     metrics = {
@@ -890,7 +1175,7 @@ def build_primary_scene() -> dict[str, object]:
         "body_source": "Reachy Mini robot_no_collision.urdf STL body/mechanics; Reachy head/antenna visuals skipped",
         "head_source": str(SLOPPY_SVG),
         "svg_reference_loaded_in_scene": True,
-        "orientation": "front faces negative Y; same orientation used for Reachy reference comparison",
+        "orientation": "Reachy +X camera/front rotated to scene -Y; same orientation used for Reachy reference comparison",
         "reachy_body_visuals_imported_for_sloppy": sloppy_body.stats.imported,
         "reachy_body_non_empty_meshes_for_sloppy": sloppy_body.stats.non_empty,
     }
@@ -904,10 +1189,10 @@ def build_comparison_scene() -> dict[str, object]:
     mats = make_materials()
     add_floor(width=1.02, depth=0.66)
 
-    left_offset = -0.18
-    right_offset = 0.12
-    root_left = Matrix.Translation(Vector((left_offset, 0.0, 0.0)))
-    root_right = Matrix.Translation(Vector((right_offset, 0.0, 0.0)))
+    left_offset = -0.20
+    right_offset = 0.10
+    root_left = Matrix.Translation(Vector((left_offset, 0.0, 0.0))) @ REACHY_FRONT_TO_SCENE_FRONT
+    root_right = Matrix.Translation(Vector((right_offset, 0.0, 0.0))) @ REACHY_FRONT_TO_SCENE_FRONT
 
     sloppy_body = import_reachy_assembly(
         collection_name="comparison_left_sloppy_reused_reachy_body",
@@ -919,8 +1204,8 @@ def build_comparison_scene() -> dict[str, object]:
     sloppy_head = create_svg_head(left_offset, mats)
     volumes = add_internal_reservation_volumes(left_offset, mats)
 
-    # Same URDF-derived orientation as the Sloppy body. The reference is not
-    # mirrored or turned away, fixing the previous comparison readability issue.
+    # Same corrected front orientation as the Sloppy body. The raw URDF points
+    # its front along +X, which read as "turned right" in the previous preview.
     reference = import_reachy_assembly(
         collection_name="comparison_right_reachy_reference_same_orientation",
         root_matrix=root_right,
@@ -928,12 +1213,12 @@ def build_comparison_scene() -> dict[str, object]:
         mode="reference",
     )
 
-    svg_ref = add_svg_reference_board(center=(0.320, -0.075, 0.290), height=0.118, mats=mats)
+    svg_ref = add_svg_reference_board(center=(0.325, -0.075, 0.245), height=0.150, mats=mats)
 
-    add_text("SloppyTron\nSVG head / Reachy body", location=(left_offset, -0.082, 0.430), size=0.0085)
-    add_text("Reachy Mini reference\nsame front direction", location=(right_offset, -0.082, 0.430), size=0.0085)
+    add_text("SloppyTron\ncorrected SVG head / Reachy body", location=(left_offset, -0.082, 0.365), size=0.0085)
+    add_text("Reachy Mini reference\nfront rotated to camera", location=(right_offset, -0.082, 0.365), size=0.0085)
     add_text("fronts aligned toward camera (-Y)", location=(0.0, -0.078, 0.028), size=0.0075)
-    add_camera_and_light(target=Vector((0.045, 0.0, 0.225)), radius=1.03, z=0.33, focal_length=42)
+    add_camera_and_light(target=Vector((0.050, 0.0, 0.190)), radius=1.03, z=0.285, focal_length=42)
 
     all_sloppy = sloppy_body.objects + sloppy_head + volumes
     metrics = {
@@ -942,11 +1227,11 @@ def build_comparison_scene() -> dict[str, object]:
         "reachy_reference_visuals_imported": reference.stats.imported,
         "reachy_reference_non_empty_meshes": reference.stats.non_empty,
         "reachy_reference_missing_meshes": reference.stats.missing,
-        "reachy_reference_orientation": "same as Sloppy body: URDF front/camera side faces negative Y",
+        "reachy_reference_orientation": "raw URDF +X camera/front rotated to scene -Y",
         "svg_reference_loaded_in_scene": len(svg_ref) > 0,
         "sloppy_body_source": "Reachy Mini body/base/Stewart/speaker STL geometry imported from robot_no_collision.urdf",
         "sloppy_head_source": str(SLOPPY_SVG),
-        "sloppy_head_strategy": "mascot SVG body/ears/eyes/nose curves scaled onto Reachy head envelope; Reachy head and antenna STL visuals skipped",
+        "sloppy_head_strategy": "mascot SVG body/ears/arms/eyes/nose scaled upright onto Reachy head envelope; Reachy head and antenna STL visuals skipped",
         "internal_reserved_volumes": [
             "Pi Camera Module 3: 25 x 24 x 12 mm",
             "XVF3800-style 4-mic array: diameter 65 x 6 mm",
