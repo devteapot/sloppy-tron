@@ -41,41 +41,52 @@ class FakeBodyNode(Node):
     def _on_command(self, message: String) -> None:
         try:
             command = command_from_json(message.data)
-            self._apply_command(command.action, command.params)
+            self._apply_command(command.action, command.params, command.task_id)
         except (ValueError, KeyError, TypeError) as exc:
             self.get_logger().warning(f"Ignoring invalid body command: {exc}")
 
-    def _apply_command(self, action: str, params: dict) -> None:
+    def _apply_command(self, action: str, params: dict, task_id: str) -> None:
         if action == "wake":
-            self._backend.wake()
+            self._backend.wake(task_id=task_id)
         elif action == "sleep":
-            self._backend.sleep()
+            self._backend.sleep(task_id=task_id)
         elif action == "look_at_angles":
-            self._backend.look_at_angles(float(params["pan"]), float(params["tilt"]))
+            self._backend.look_at_angles(
+                float(params["pan"]),
+                float(params["tilt"]),
+                task_id=task_id,
+            )
         elif action == "look_at_point":
             self._backend.look_at_point(
                 float(params["x"]),
                 float(params["y"]),
                 float(params["z"]),
+                task_id=task_id,
             )
         elif action == "look_toward_sound":
-            self._backend.look_toward_sound()
+            self._backend.look_toward_sound(task_id=task_id)
         elif action == "gesture":
-            self._backend.gesture(coerce_gesture(str(params["gesture"])))
+            self._backend.gesture(
+                coerce_gesture(str(params["gesture"])),
+                task_id=task_id,
+            )
         elif action == "capture_frame":
-            self._backend.capture_frame()
+            self._backend.capture_frame(task_id=task_id)
         elif action == "set_idle_mode":
-            self._backend.set_idle_mode(_coerce_idle_mode(str(params["idleMode"])))
+            self._backend.set_idle_mode(
+                _coerce_idle_mode(str(params["idleMode"])),
+                task_id=task_id,
+            )
         elif action == "release_media":
-            self._backend.release_media()
+            self._backend.release_media(task_id=task_id)
         elif action == "acquire_media":
-            self._backend.acquire_media()
+            self._backend.acquire_media(task_id=task_id)
         elif action == "enable_motion":
-            self._backend.enable_motion()
+            self._backend.enable_motion(task_id=task_id)
         elif action == "disable_motion":
-            self._backend.disable_motion()
+            self._backend.disable_motion(task_id=task_id)
         elif action == "emergency_stop":
-            self._backend.emergency_stop()
+            self._backend.emergency_stop(task_id=task_id)
         else:
             raise ValueError(f"unsupported body command action: {action}")
 

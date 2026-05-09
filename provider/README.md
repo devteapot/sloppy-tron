@@ -33,6 +33,19 @@ Initial affordances:
 
 The adapter should map ROS 2 state/actions into this semantic SLOP surface.
 
+The provider exposes `/body` as the spec-aligned identity node. There is no
+`/identity` compatibility alias while the contract is still actively evolving.
+
+`src/sloppy_tron/provider/contract.py` explicitly partitions declared
+affordances into `IMPLEMENTED_AFFORDANCE_NAMES` and `FUTURE_AFFORDANCE_NAMES`.
+Tests verify the implemented set is actually exposed across representative body
+states, while future low-level/calibration controls remain declared but hidden.
+
+Safety semantics: `wake` is a high-level safe posture transition that may enable
+only conservative clamped body behavior in the current fake/v0 contract.
+`enable_motion` remains a guarded control for arming lower-level/manual motion
+paths and should stay approval-gated before real hardware is attached.
+
 ## Current Python Scaffold
 
 The initial fake provider contract lives in `src/sloppy_tron/provider` and uses

@@ -85,6 +85,22 @@ def test_capture_frame_requires_media_ownership() -> None:
     assert state["vision"]["privacyMode"] == "local_explicit_capture_only"
 
 
+def test_fake_backend_can_preserve_external_task_id() -> None:
+    backend = FakeBodyBackend()
+    backend.enable_motion()
+
+    task = backend.look_at_angles(10.0, -5.0, task_id="ros-task-42")
+    state = backend.snapshot()
+
+    assert task.task_id == "ros-task-42"
+    assert state["tasks"]["ros-task-42"]["name"] == "look_at_angles"
+    assert state["tasks"]["ros-task-42"]["result"] == {
+        "accepted": True,
+        "pan": 10.0,
+        "tilt": -5.0,
+    }
+
+
 def test_gesture_validation_rejects_unknown_names() -> None:
     assert coerce_gesture("nod") == "nod"
 

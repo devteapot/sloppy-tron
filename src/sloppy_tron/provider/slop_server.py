@@ -126,7 +126,7 @@ def create_slop_server(backend: BodyBackend | None = None) -> SlopServer:
 
     _register_node(server, "connection", connection_node)
 
-    def identity_node() -> Descriptor:
+    def body_node() -> Descriptor:
         state = body.snapshot()
         return {
             "type": "context",
@@ -134,7 +134,7 @@ def create_slop_server(backend: BodyBackend | None = None) -> SlopServer:
             "summary": "Body identity and capability summary.",
         }
 
-    _register_node(server, "identity", identity_node)
+    _register_node(server, "body", body_node)
 
     def pose_node() -> Descriptor:
         state = body.snapshot()

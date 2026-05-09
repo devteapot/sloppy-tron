@@ -85,6 +85,30 @@ AFFORDANCES: tuple[Affordance, ...] = (
     ),
 )
 
+IMPLEMENTED_AFFORDANCE_NAMES: frozenset[str] = frozenset(
+    {
+        "refresh",
+        "capture_state_snapshot",
+        "wake",
+        "sleep",
+        "look_at_angles",
+        "look_at_point",
+        "look_toward_sound",
+        "gesture",
+        "capture_frame",
+        "set_idle_mode",
+        "release_media",
+        "acquire_media",
+        "enable_motion",
+        "disable_motion",
+        "emergency_stop",
+    }
+)
+FUTURE_AFFORDANCE_NAMES: frozenset[str] = (
+    frozenset(affordance.name for affordance in AFFORDANCES)
+    - IMPLEMENTED_AFFORDANCE_NAMES
+)
+
 
 def affordances_as_dicts() -> list[JsonObject]:
     return [affordance.to_dict() for affordance in AFFORDANCES]

@@ -26,21 +26,7 @@ class RosBridgeBackend:
         platform: BridgePlatform = PI5_JAZZY,
     ) -> None:
         initial_state = FakeBodyBackend().snapshot()
-        connection = _object_section(initial_state, "connection")
-        connection["backend"] = "ros_bridge"
-        connection["platform"] = platform.id
-        runtime = _object_section(initial_state, "runtime")
-        config = _object_section(runtime, "config")
-        config.update(
-            {
-                "platform": platform.id,
-                "board": platform.board,
-                "rosDistro": platform.ros_distro,
-                "ubuntuVersion": platform.ubuntu_version,
-                "pythonVersion": platform.python_version,
-            }
-        )
-        self._state = initial_state
+        self._state = _annotate_bridge_state(initial_state, platform)
         self._command_sink = command_sink
         self._platform = platform
         self._task_numbers = count(1)
@@ -49,7 +35,13 @@ class RosBridgeBackend:
         return copy.deepcopy(self._state)
 
     def update_snapshot(self, snapshot: Mapping[str, object]) -> None:
-        self._state = copy.deepcopy(cast(JsonObject, dict(snapshot)))
+        next_state = copy.deepcopy(cast(JsonObject, dict(snapshot)))
+        previous_tasks = _object_section(self._state, "tasks")
+        incoming_tasks = _object_section(next_state, "tasks")
+        merged_tasks = copy.deepcopy(previous_tasks)
+        merged_tasks.update(incoming_tasks)
+        next_state["tasks"] = merged_tasks
+        self._state = _annotate_bridge_state(next_state, self._platform)
 
     def wake(self) -> TaskState:
         return self._issue("wake", {"posture": "awake"}, async_task=True)
@@ -191,6 +183,34 @@ class RosBridgeBackend:
         return min(max(value, minimum), maximum)
 
 
+def _annotate_bridge_state(state: JsonObject, platform: BridgePlatform) -> JsonObject:
+    connection = _object_section(state, "connection")
+    body_backend = _string(
+        connection.get("bodyBackend", connection.get("backend")),
+        "unknown",
+    )
+    connection["providerBackend"] = "ros_bridge"
+    connection["bodyBackend"] = body_backend
+    connection["backend"] = "ros_bridge"
+    connection["platform"] = platform.id
+
+    runtime = _object_section(state, "runtime")
+    config = _object_section(runtime, "config")
+    config.setdefault("backend", body_backend)
+    config.update(
+        {
+            "providerBackend": "ros_bridge",
+            "bodyBackend": body_backend,
+            "platform": platform.id,
+            "board": platform.board,
+            "rosDistro": platform.ros_distro,
+            "ubuntuVersion": platform.ubuntu_version,
+            "pythonVersion": platform.python_version,
+        }
+    )
+    return state
+
+
 def _object_section(data: JsonObject, name: str) -> JsonObject:
     section = data.get(name)
     if isinstance(section, dict):
@@ -203,4 +223,10 @@ def _object_section(data: JsonObject, name: str) -> JsonObject:
 def _number(value: object, default: float) -> float:
     if isinstance(value, int | float):
         return float(value)
+    return default
+
+
+def _string(value: object, default: str) -> str:
+    if isinstance(value, str) and value:
+        return value
     return default

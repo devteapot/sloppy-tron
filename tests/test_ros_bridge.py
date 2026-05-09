@@ -86,9 +86,49 @@ def test_ros_bridge_backend_reports_platform_in_state() -> None:
     state = backend.snapshot()
 
     assert state["connection"]["backend"] == "ros_bridge"
+    assert state["connection"]["providerBackend"] == "ros_bridge"
+    assert state["connection"]["bodyBackend"] == "fake"
     assert state["connection"]["platform"] == "jetson_humble"
     assert state["runtime"]["config"]["rosDistro"] == "humble"
     assert state["runtime"]["config"]["pythonVersion"] == "3.10"
+
+
+def test_ros_bridge_backend_preserves_bridge_metadata_after_body_state_update() -> None:
+    backend = RosBridgeBackend(lambda command: None, platform=PI5_JAZZY)
+    fake = FakeBodyBackend()
+
+    backend.update_snapshot(fake.snapshot())
+    state = backend.snapshot()
+
+    assert state["connection"]["backend"] == "ros_bridge"
+    assert state["connection"]["providerBackend"] == "ros_bridge"
+    assert state["connection"]["bodyBackend"] == "fake"
+    assert state["connection"]["platform"] == "pi5_jazzy"
+    assert state["runtime"]["config"]["providerBackend"] == "ros_bridge"
+    assert state["runtime"]["config"]["bodyBackend"] == "fake"
+
+
+def test_ros_bridge_backend_preserves_task_id_through_body_snapshot() -> None:
+    commands: list[BridgeCommand] = []
+    bridge = RosBridgeBackend(commands.append)
+    fake = FakeBodyBackend()
+    fake.enable_motion()
+    bridge.update_snapshot(fake.snapshot())
+
+    bridge_task = bridge.look_at_angles(12.0, -6.0)
+    command = commands[-1]
+    fake.look_at_angles(
+        float(command.params["pan"]),
+        float(command.params["tilt"]),
+        task_id=command.task_id,
+    )
+    bridge.update_snapshot(fake.snapshot())
+    state = bridge.snapshot()
+
+    assert command.task_id == bridge_task.task_id
+    assert bridge_task.task_id in state["tasks"]
+    assert state["tasks"][bridge_task.task_id]["name"] == "look_at_angles"
+    assert state["tasks"][bridge_task.task_id]["status"] == "succeeded"
 
 
 def test_ros_bridge_backend_does_not_publish_blocked_motion() -> None:
