@@ -1,0 +1,101 @@
+{
+  "source_reference": "/tmp/reachy_mini/src/reachy_mini/descriptions/reachy_mini/urdf/robot_no_collision.urdf",
+  "source_sloppytron": "/Users/sloppy/dev/sloppy-tron/cad/sloppy_tron_v0/source/sloppy_tron_v0.blend",
+  "reference_visuals_seen": 161,
+  "reference_objects_imported": 161,
+  "reference_unique_meshes": 161,
+  "missing_meshes": [],
+  "unit_scale_applied_to_reference": 1.0,
+  "sloppytron_before_placement": {
+    "min_m": [
+      -0.092,
+      -0.104197,
+      0.0
+    ],
+    "max_m": [
+      0.092,
+      0.104197,
+      0.395341
+    ],
+    "dims_m": [
+      0.184,
+      0.208393,
+      0.395341
+    ],
+    "center_m": [
+      0.0,
+      0.0,
+      0.19767
+    ]
+  },
+  "reachy_reference_before_placement": {
+    "min_m": [
+      -0.077517,
+      -0.078084,
+      -0.000206
+    ],
+    "max_m": [
+      0.077485,
+      0.078084,
+      0.390914
+    ],
+    "dims_m": [
+      0.155002,
+      0.156168,
+      0.39112
+    ],
+    "center_m": [
+      -1.6e-05,
+      0.0,
+      0.195354
+    ]
+  },
+  "sloppytron_final": {
+    "min_m": [
+      -0.25675,
+      -0.104197,
+      0.0
+    ],
+    "max_m": [
+      -0.072751,
+      0.104197,
+      0.395341
+    ],
+    "dims_m": [
+      0.184,
+      0.208393,
+      0.395341
+    ],
+    "center_m": [
+      -0.164751,
+      -0.0,
+      0.19767
+    ]
+  },
+  "reachy_reference_final": {
+    "min_m": [
+      0.087249,
+      -0.078084,
+      0.0
+    ],
+    "max_m": [
+      0.242252,
+      0.078084,
+      0.39112
+    ],
+    "dims_m": [
+      0.155002,
+      0.156168,
+      0.39112
+    ],
+    "center_m": [
+      0.16475,
+      -0.0,
+      0.19556
+    ]
+  },
+  "interpretation": [
+    "Reachy reference is imported from upstream URDF/STL for envelope and UX comparison only.",
+    "SloppyTron v0 remains an original mascot-derived exterior over a Reachy-inspired companion envelope."
+  ]
+}

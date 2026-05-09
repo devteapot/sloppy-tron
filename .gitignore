@@ -1,16 +1,8 @@
-node_modules/
-.venv/
-.mypy_cache/
-.pytest_cache/
-.ruff_cache/
-dist/
-.env
-.env.*
-*.log
+# Python cache
 __pycache__/
-*.pyc
-build/
-install/
-log/
-.colcon/
-.DS_Store
+*.py[cod]
+
+# Blender backup files
+*.blend1
+*.blend2
+*.blend@
