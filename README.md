@@ -101,6 +101,7 @@ docker compose run --rm ros-humble ./docker/ros-smoke.sh
 ## Status
 
 Software scaffold in progress. The repo currently has a fake Python `body`
-provider using the `slop-ai` SDK, shared ROS bridge core logic, a first
-`ament_python` ROS package, and local Docker checks for Jazzy and Humble. No
-real hardware-control backend is implemented yet.
+provider using the `slop-ai` SDK, a Reachy Mini daemon backend for mockup/MuJoCo
+simulation behind the same SLOP consumer contract, shared ROS bridge core logic,
+a first `ament_python` ROS package, and local Docker checks for Jazzy and Humble.
+No real hardware-control backend is implemented yet.

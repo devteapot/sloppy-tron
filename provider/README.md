@@ -67,5 +67,47 @@ The fake backend is intentionally hardware-free. It exposes the state tree,
 marks risky controls as guarded or dangerous, clamps look targets to configured
 limits, and records observable task state for accepted actions.
 
+A Reachy Mini daemon backend is also available behind the same consumer-facing
+SLOP contract. It talks to the upstream daemon over FastAPI, so the consumer sees
+`/body`, `/pose`, `/safety`, `/tasks`, etc. regardless of whether the body behind
+that boundary is fake, ROS 2, mockup-sim, MuJoCo, or later real hardware:
+
+```sh
+# Terminal 1: upstream Reachy Mini daemon, MuJoCo/headless
+reachy-mini-daemon \
+  --sim \
+  --headless \
+  --scene empty \
+  --no-media \
+  --no-wake-up-on-start \
+  --no-goto-sleep-on-stop \
+  --fastapi-port 8001
+
+# Terminal 2: expose the same SLOP provider contract backed by that daemon
+uv run python -m sloppy_tron.provider \
+  --backend reachy \
+  --reachy-host localhost \
+  --reachy-port 8001 \
+  snapshot
+
+uv run python -m sloppy_tron.provider \
+  --backend reachy \
+  --reachy-port 8001 \
+  serve-stdio
+```
+
+For a local smoke test when `reachy-mini-daemon` is installed with the MuJoCo
+extra, run:
+
+```sh
+./docker/reachy-mujoco-smoke.sh mujoco
+# or the lighter no-physics upstream backend:
+./docker/reachy-mujoco-smoke.sh mockup
+```
+
+The smoke client verifies daemon status, enables motion, sends a semantic
+`look_at_angles` command through `ReachyDaemonBackend`, and checks that the final
+state still has the standard SLOP body-provider shape.
+
 `python -m sloppy_tron.provider` defaults to `serve-stdio`, so the example
 Sloppy provider config can launch it as a subprocess provider.

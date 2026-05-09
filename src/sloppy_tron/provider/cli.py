@@ -11,14 +11,33 @@ from slop_ai.transports.stdio import listen as listen_stdio
 from slop_ai.transports.unix import listen as listen_unix
 from slop_ai.transports.unix import unregister_provider
 
+from sloppy_tron.provider.backend import BodyBackend
 from sloppy_tron.provider.contract import IdleMode, JsonObject
 from sloppy_tron.provider.fake_backend import FakeBodyBackend
+from sloppy_tron.provider.reachy_backend import ReachyDaemonBackend
 from sloppy_tron.provider.slop_server import create_slop_server
 from sloppy_tron.provider.state import coerce_gesture
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="python -m sloppy_tron.provider")
+    parser.add_argument(
+        "--backend",
+        choices=["fake", "reachy"],
+        default="fake",
+        help="Body backend to expose through the same SLOP consumer contract.",
+    )
+    parser.add_argument(
+        "--reachy-host",
+        default="localhost",
+        help="Reachy Mini daemon host when --backend=reachy.",
+    )
+    parser.add_argument(
+        "--reachy-port",
+        type=int,
+        default=8000,
+        help="Reachy Mini daemon FastAPI port when --backend=reachy.",
+    )
     subparsers = parser.add_subparsers(dest="command")
 
     subparsers.add_parser("snapshot")
@@ -50,7 +69,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     idle_parser.add_argument("mode", choices=["off", "breathing", "attentive"])
 
     args = parser.parse_args(argv)
-    backend = FakeBodyBackend()
+    backend = _make_backend(args.backend, args.reachy_host, args.reachy_port)
     command = args.command or "serve-stdio"
 
     if command == "snapshot":
@@ -61,7 +80,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         asyncio.run(listen_stdio(create_slop_server(backend)))
         return 0
     elif command == "serve-unix":
-        asyncio.run(_serve_unix(args.socket_path, args.register))
+        asyncio.run(_serve_unix(args.socket_path, args.register, backend))
         return 0
     elif command == "wake":
         payload = _task_payload(backend.wake().to_dict(), backend.snapshot())
@@ -97,9 +116,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     return 0
 
 
-async def _serve_unix(socket_path: str, register: bool) -> None:
+async def _serve_unix(socket_path: str, register: bool, backend: BodyBackend) -> None:
     server = await listen_unix(
-        create_slop_server(),
+        create_slop_server(backend),
         socket_path,
         register=register,
     )
@@ -108,6 +127,15 @@ async def _serve_unix(socket_path: str, register: bool) -> None:
     finally:
         if register:
             unregister_provider("body")
+
+
+def _make_backend(backend: str, reachy_host: str, reachy_port: int) -> BodyBackend:
+    if backend == "fake":
+        return FakeBodyBackend()
+    if backend == "reachy":
+        return ReachyDaemonBackend(host=reachy_host, port=reachy_port)
+    msg = f"unsupported backend: {backend}"
+    raise ValueError(msg)
 
 
 def _task_payload(task: JsonObject, state: JsonObject) -> JsonObject:
