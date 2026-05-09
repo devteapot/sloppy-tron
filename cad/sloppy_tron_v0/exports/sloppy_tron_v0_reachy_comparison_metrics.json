@@ -1,31 +1,32 @@
 {
+  "pass": "productized-v0.2",
   "source_reference": "/tmp/reachy_mini/src/reachy_mini/descriptions/reachy_mini/urdf/robot_no_collision.urdf",
   "source_sloppytron": "/Users/sloppy/dev/sloppy-tron/cad/sloppy_tron_v0/source/sloppy_tron_v0.blend",
   "reference_visuals_seen": 161,
   "reference_objects_imported": 161,
-  "reference_unique_meshes": 161,
+  "reference_nonempty_meshes": 161,
   "missing_meshes": [],
   "unit_scale_applied_to_reference": 1.0,
   "sloppytron_before_placement": {
     "min_m": [
-      -0.092,
-      -0.104197,
+      -0.090474,
+      -0.077828,
       0.0
     ],
     "max_m": [
-      0.092,
-      0.104197,
-      0.395341
+      0.090474,
+      0.07,
+      0.432103
     ],
     "dims_m": [
-      0.184,
-      0.208393,
-      0.395341
+      0.180948,
+      0.147828,
+      0.432103
     ],
     "center_m": [
       0.0,
-      0.0,
-      0.19767
+      -0.003914,
+      0.216051
     ]
   },
   "reachy_reference_before_placement": {
@@ -52,34 +53,34 @@
   },
   "sloppytron_final": {
     "min_m": [
-      -0.25675,
-      -0.104197,
+      -0.246962,
+      -0.073914,
       0.0
     ],
     "max_m": [
-      -0.072751,
-      0.104197,
-      0.395341
+      -0.066013,
+      0.073914,
+      0.432103
     ],
     "dims_m": [
-      0.184,
-      0.208393,
-      0.395341
+      0.180948,
+      0.147828,
+      0.432103
     ],
     "center_m": [
-      -0.164751,
-      -0.0,
-      0.19767
+      -0.156487,
+      0.0,
+      0.216051
     ]
   },
   "reachy_reference_final": {
     "min_m": [
-      0.087249,
+      0.078986,
       -0.078084,
       0.0
     ],
     "max_m": [
-      0.242252,
+      0.233989,
       0.078084,
       0.39112
     ],
@@ -89,13 +90,13 @@
       0.39112
     ],
     "center_m": [
-      0.16475,
+      0.156487,
       -0.0,
       0.19556
     ]
   },
-  "interpretation": [
-    "Reachy reference is imported from upstream URDF/STL for envelope and UX comparison only.",
-    "SloppyTron v0 remains an original mascot-derived exterior over a Reachy-inspired companion envelope."
+  "design_assessment": [
+    "v0.2 productizes the mascot shell: flatter faceplate, visible gimbal/neck mechanics, panel seams, screws, mic/speaker/camera details.",
+    "Reachy remains the envelope and kinematic reference only; exterior geometry is original SLOP mascot language."
   ]
 }
