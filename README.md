@@ -92,6 +92,12 @@ entrypoints for the first two likely platforms:
 For local macOS development, use the Docker services in `compose.yaml`:
 
 ```sh
+# Reachy Mini upstream daemon end-to-end checks.
+docker compose build reachy-e2e
+docker compose run --rm reachy-e2e ./docker/reachy-e2e-check.sh mockup
+docker compose run --rm reachy-e2e ./docker/reachy-e2e-check.sh mujoco
+
+# ROS bridge checks.
 docker compose run --rm ros-jazzy ./docker/ros-check.sh
 docker compose run --rm ros-humble ./docker/ros-check.sh
 docker compose run --rm ros-jazzy ./docker/ros-smoke.sh
@@ -102,6 +108,7 @@ docker compose run --rm ros-humble ./docker/ros-smoke.sh
 
 Software scaffold in progress. The repo currently has a fake Python `body`
 provider using the `slop-ai` SDK, a Reachy Mini daemon backend for mockup/MuJoCo
-simulation behind the same SLOP consumer contract, shared ROS bridge core logic,
-a first `ament_python` ROS package, and local Docker checks for Jazzy and Humble.
-No real hardware-control backend is implemented yet.
+simulation behind the same SLOP consumer contract, a dedicated Reachy e2e Docker
+container for upstream daemon validation, shared ROS bridge core logic, a first
+`ament_python` ROS package, and local Docker checks for Jazzy and Humble. No real
+hardware-control backend is implemented yet.

@@ -34,10 +34,25 @@ COMMON_ARGS=(
   --log-level INFO
 )
 
+DAEMON_PID=""
+cleanup() {
+  local rc=$?
+  if [[ ${rc} -ne 0 && -f "${LOG_FILE}" ]]; then
+    echo "---- reachy-mini-daemon log (${LOG_FILE}) ----" >&2
+    tail -200 "${LOG_FILE}" >&2 || true
+    echo "---- end reachy-mini-daemon log ----" >&2
+  fi
+  if [[ -n "${DAEMON_PID}" ]]; then
+    kill "${DAEMON_PID}" >/dev/null 2>&1 || true
+    wait "${DAEMON_PID}" >/dev/null 2>&1 || true
+  fi
+  exit "${rc}"
+}
+trap cleanup EXIT
+
 echo "Starting Reachy Mini daemon (${MODE}) on localhost:${PORT}..."
 reachy-mini-daemon "${MODE_ARGS[@]}" "${COMMON_ARGS[@]}" >"${LOG_FILE}" 2>&1 &
 DAEMON_PID=$!
-trap 'kill "${DAEMON_PID}" >/dev/null 2>&1 || true' EXIT
 
 python - "${PORT}" <<'PY'
 import json

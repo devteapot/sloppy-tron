@@ -105,6 +105,16 @@ extra, run:
 ./docker/reachy-mujoco-smoke.sh mockup
 ```
 
+The repo also includes a Dockerized Reachy e2e environment that installs the
+upstream daemon and MuJoCo dependencies, so local macOS does not need a native
+Reachy install:
+
+```sh
+docker compose build reachy-e2e
+docker compose run --rm reachy-e2e ./docker/reachy-e2e-check.sh mockup
+docker compose run --rm reachy-e2e ./docker/reachy-e2e-check.sh mujoco
+```
+
 The smoke client verifies daemon status, enables motion, sends a semantic
 `look_at_angles` command through `ReachyDaemonBackend`, and checks that the final
 state still has the standard SLOP body-provider shape.

@@ -10,6 +10,26 @@ x-ros-dev: &ros-dev
     UV_LINK_MODE: copy
 
 services:
+  reachy-e2e:
+    working_dir: /workspace
+    image: sloppy-tron-reachy-e2e:dev
+    build:
+      context: .
+      dockerfile: docker/reachy-e2e.Dockerfile
+      args:
+        REACHY_MINI_SPEC: ${REACHY_MINI_SPEC:-reachy_mini[mujoco]==1.7.1}
+    volumes:
+      - .:/workspace
+      - uv-cache-reachy:/root/.cache/uv
+    environment:
+      MUJOCO_GL: ${MUJOCO_GL:-osmesa}
+      PYOPENGL_PLATFORM: ${PYOPENGL_PLATFORM:-osmesa}
+      REACHY_PORT: ${REACHY_PORT:-8001}
+      UV_PROJECT_ENVIRONMENT: /tmp/sloppy-tron-venv
+      UV_LINK_MODE: copy
+    ports:
+      - "${REACHY_PORT:-8001}:${REACHY_PORT:-8001}"
+
   ros-jazzy:
     <<: *ros-dev
     image: sloppy-tron-ros-jazzy:dev
@@ -43,6 +63,7 @@ services:
       - ros-humble-log:/workspace/ros/log
 
 volumes:
+  uv-cache-reachy:
   uv-cache-jazzy:
   uv-cache-humble:
   ros-jazzy-build:
