@@ -42,7 +42,7 @@ See `docker/README.md` for image details and interactive shell commands.
 
 ## Current Bridge Scaffold
 
-The ROS workspace now has two package roles:
+The ROS workspace now has three package roles:
 
 - `ros/src/sloppy_tron_ros_bridge` hosts the SLOP bridge plus the lightweight
   fake body node.
@@ -51,6 +51,9 @@ The ROS workspace now has two package roles:
   other body backends plus `sensor_msgs/JointState` on `joint_states`. It is the
   open baseline for SloppyTron's own ROS body graph; Reachy MuJoCo remains the
   vendor oracle, not the substrate we depend on.
+- `ros/src/sloppy_tron_description` hosts the first custom SloppyTron v0 visual
+  and kinematic description: Reachy-inspired companion proportions using the
+  Sloppy mascot from `~/dev/slop/logo/sloppy.svg` as the visual reference.
 
 It adds these initial node roles:
 
@@ -72,6 +75,16 @@ Platform-specific entrypoints:
 
 The generic `fake_body`, `baseline_body`, and `slop_bridge` commands currently
 default to the Pi 5 / Jazzy profile.
+
+The v0 visual description can be inspected from a full ROS desktop install with:
+
+```sh
+ros2 launch sloppy_tron_description view_sloppy_tron_v0.launch.py
+```
+
+The generated low-poly meshes are reference geometry only. Final printable CAD
+belongs under `cad/sloppy_tron_v0/` and should keep the URDF joint/link names so
+the SLOP `/body` contract stays invariant while the exterior evolves.
 
 The command/state topics are a development bridge, not the final low-level
 hardware interface. The command envelope stays semantic (`wake`, `sleep`,

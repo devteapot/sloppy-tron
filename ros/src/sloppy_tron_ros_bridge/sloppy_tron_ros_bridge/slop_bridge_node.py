@@ -71,6 +71,8 @@ class SlopBridgeNode(Node):
         self._slop.refresh()
 
     def _drain_commands(self) -> None:
+        if self._command_publisher.get_subscription_count() == 0:
+            return
         while not self._commands.empty():
             command = self._commands.get_nowait()
             message = String()
